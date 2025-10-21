@@ -9,7 +9,7 @@ target/
 
 # Logs
 *.log
-
+**/.env
 
 # Archivos de configuración locales
 **/application.properties
