@@ -11,8 +11,11 @@ import java.util.List;
 @Repository
 public interface IRepositoryReservation extends MongoRepository<Reservation,String> {
 
-    @Query("{ 'roomId': ?0, 'checkInDate': { $lt: ?2 }, 'checkOutDate': { $gt: ?1 } }")
-    Boolean existsByRoomIdAndDateOverlap(Long roomId, LocalDate checkInDate, LocalDate checkOutDate);
+    boolean existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
+            Long roomId,
+            LocalDate checkOutDate,
+            LocalDate checkInDate
+    );
 
     void deleteAllByUserId(Long userId);
 

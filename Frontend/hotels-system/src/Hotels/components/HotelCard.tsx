@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { MapPin, Star } from 'lucide-react'
 import React from 'react'
 import { Link } from 'react-router'
-import type { Hotel } from '../types/hotel.interface'
+import type { Hotel } from '../data/hotel.interface'
 
 interface HotelCardProps {
     hotel: Hotel;
@@ -24,7 +24,7 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
                 <CardTitle className="text-balance">{hotel.name}</CardTitle>
                 <CardDescription className="flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
-                    {hotel.location}
+                    {hotel.location}, {hotel.country}
                 </CardDescription>
             </CardHeader>
             <CardContent>

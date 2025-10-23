@@ -1,6 +1,6 @@
 
 import { hotelApi } from "../hotelApi";
-import type { Hotel } from "../types/hotel.interface";
+import type { Hotel } from "../data/hotel.interface";
 
 
 export const getHotels = async (): Promise<Hotel[]> => {

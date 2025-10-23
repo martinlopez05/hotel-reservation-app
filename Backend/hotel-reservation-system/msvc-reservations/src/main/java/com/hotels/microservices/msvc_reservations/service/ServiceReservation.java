@@ -1,5 +1,6 @@
 package com.hotels.microservices.msvc_reservations.service;
 
+import com.hotels.microservices.msvc_reservations.Listener.UserListener;
 import com.hotels.microservices.msvc_reservations.client.HotelClientRest;
 import com.hotels.microservices.msvc_reservations.client.RoomCilentRest;
 import com.hotels.microservices.msvc_reservations.client.UserClientRest;
@@ -37,21 +38,25 @@ public class ServiceReservation implements IServiceReservation{
     @Autowired
     UserClientRest userClientRest;
 
+    @Autowired
+    UserListener userListener;
+
     @Override
     public ReservationResponseDTO create(ReservationRequestDTO reservationRequestDTO) {
 
-        Boolean exists = repositoryReservation.existsByRoomIdAndDateOverlap(
-                reservationRequestDTO.getRoomId(),
-                reservationRequestDTO.getCheckInDate(),
-                reservationRequestDTO.getCheckOutDate()
-        );
+        boolean exists = repositoryReservation
+                .existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
+                        reservationRequestDTO.getRoomId(),
+                        reservationRequestDTO.getCheckOutDate(),
+                        reservationRequestDTO.getCheckInDate()
+                );
 
         if (reservationRequestDTO.getCheckOutDate() == null
                 || reservationRequestDTO.getCheckOutDate().isEqual(reservationRequestDTO.getCheckInDate())) {
             reservationRequestDTO.setCheckOutDate(reservationRequestDTO.getCheckInDate());
         }
 
-        long days = ChronoUnit.DAYS.between(reservationRequestDTO.getCheckInDate(), reservationRequestDTO.getCheckOutDate()) + 1;
+        long days = ChronoUnit.DAYS.between(reservationRequestDTO.getCheckInDate(), reservationRequestDTO.getCheckOutDate());
         if (days == 0){
             days = 1;
         }

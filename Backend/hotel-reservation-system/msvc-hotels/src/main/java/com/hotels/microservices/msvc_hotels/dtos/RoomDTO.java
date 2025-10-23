@@ -18,6 +18,8 @@ public class RoomDTO {
 
     private int capacity;
 
+    private String imageUrl;
+
     private Boolean available;
 
     private int rating;

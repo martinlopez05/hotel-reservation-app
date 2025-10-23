@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class RoomUpdateDTO {
     private Integer roomNumber;
     private Integer capacity;
+    private String imageUrl;
     private Boolean available;
     private Integer rating;
     private Double pricePerNight;

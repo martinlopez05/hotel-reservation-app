@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select"
 import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import type { Hotel } from '../types/hotel.interface'
+import type { Hotel } from '../data/hotel.interface'
 
 interface PropsSearches {
     hotels: Hotel[]

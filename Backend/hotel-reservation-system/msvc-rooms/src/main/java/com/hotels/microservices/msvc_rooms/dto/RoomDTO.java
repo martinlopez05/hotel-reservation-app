@@ -21,8 +21,11 @@ public class RoomDTO {
     @NotNull(message = "hotelId is null")
     private Long hotelId;
 
+
     @NotNull(message = "capacity is null")
     private int capacity;
+
+    private String imageUrl;
 
     private Boolean available;
 

@@ -27,6 +27,9 @@ public class Room {
     @Column(name = "capacity")
     private int capacity;
 
+    @Column(name = "imageUrl")
+    private String imageUrl;
+
     @Column(name = "available")
     private Boolean available;
 

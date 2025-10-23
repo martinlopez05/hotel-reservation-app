@@ -1,6 +1,6 @@
 import React from 'react'
 import HotelCard from './HotelCard'
-import type { Hotel } from '../types/hotel.interface'
+import type { Hotel } from '../data/hotel.interface'
 
 
 interface PropsHotelGrid {
