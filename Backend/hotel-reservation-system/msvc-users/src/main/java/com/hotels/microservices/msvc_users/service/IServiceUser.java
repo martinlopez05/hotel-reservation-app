@@ -1,6 +1,6 @@
 package com.hotels.microservices.msvc_users.service;
 
-import com.hotels.microservices.msvc_users.dto.LoginRequestDTO;
+import com.hotels.microservices.msvc_users.dto.AuthRequestDTO;
 import com.hotels.microservices.msvc_users.dto.UserRequestDTO;
 import com.hotels.microservices.msvc_users.dto.UserResponseDTO;
 import com.hotels.microservices.msvc_users.dto.UserUpdateDTO;
@@ -14,6 +14,5 @@ public interface IServiceUser {
     UserResponseDTO create(UserRequestDTO userDTO);
     void delete(Long id);
     UserResponseDTO edit(UserUpdateDTO userUpdateDTO, Long id);
-    UserResponseDTO login(LoginRequestDTO loginRequestDTO);
 
 }

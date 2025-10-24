@@ -4,7 +4,7 @@ import { Navigate } from "react-router";
 
 
 interface Props {
-    element: JSX.Element; // React.ReactNode
+    element: JSX.Element; 
 }
 
 export const PrivateRoute = ({ element }: Props) => {

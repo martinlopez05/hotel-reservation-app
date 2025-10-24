@@ -1,6 +1,6 @@
 package com.hotels.microservices.msvc_users.service;
 
-import com.hotels.microservices.msvc_users.dto.LoginRequestDTO;
+import com.hotels.microservices.msvc_users.dto.AuthRequestDTO;
 import com.hotels.microservices.msvc_users.dto.UserRequestDTO;
 import com.hotels.microservices.msvc_users.dto.UserResponseDTO;
 import com.hotels.microservices.msvc_users.dto.UserUpdateDTO;
@@ -9,8 +9,6 @@ import com.hotels.microservices.msvc_users.model.User;
 import com.hotels.microservices.msvc_users.repository.IRepositoryUser;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,17 +64,5 @@ public class ServiceUser implements IServiceUser{
 
     }
 
-    @Override
-    public UserResponseDTO login(LoginRequestDTO loginRequestDTO) {
-        User user = repositoryUser.findByEmail(loginRequestDTO.getEmail()).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        //Comparar contraseña (solo para pruebas, sin encriptar)
-        if (!user.getPassword().equals(loginRequestDTO.getPassword())) {
-            throw new RuntimeException("Contraseña incorrecta");
-        }
-
-        // Si llega acá, las credenciales son correctas
-        return userMapper.toUserResponseDTO(user);
-    }
 
 }

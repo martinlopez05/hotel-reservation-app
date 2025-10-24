@@ -24,6 +24,7 @@ public class Room {
     @Column(name = "hotel_id")
     private Long hotelId;
 
+
     @Column(name = "capacity")
     private int capacity;
 

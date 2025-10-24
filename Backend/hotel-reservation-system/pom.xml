@@ -20,6 +20,7 @@
     <module>msvc-reservations</module>
     <module>msvc-rooms</module>
     <module>msvc-users</module>
+    <module>msvc-api-gateway</module>
   </modules>
   <dependencies>
     <dependency>

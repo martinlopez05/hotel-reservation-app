@@ -11,7 +11,7 @@ export const Layout = () => {
 
     const [isReservationsModalOpen, setIsReservationsModalOpen] = useState(false)
 
-    {/**falta el id del usuario */ }
+    
     const { user } = use(UserContext);
 
     const { data: reservations } = useGetReservationsByUser(user ? user.id : 0);

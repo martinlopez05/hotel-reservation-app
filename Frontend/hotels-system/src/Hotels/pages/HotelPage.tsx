@@ -127,7 +127,6 @@ export default function HotelPage() {
                                     className="w-full h-56 object-cover object-center"
                                 />
 
-                                {/* Contenido de la card */}
                                 <CardHeader className="pb-4">
                                     <div className="flex items-start justify-between">
                                         <div>

@@ -1,12 +1,15 @@
 package com.hotels.microservices.msvc_users.model;
 
+import com.hotels.microservices.msvc_users.enums.EnumRoles;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.naming.Name;
 
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,5 +29,9 @@ public class User {
 
     @Column(name = "email_user", nullable = false, unique = true)
     private String email;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_user")
+    private RoleEntity roleEntity;
 
 }
