@@ -68,6 +68,10 @@ public class AuthService {
                 ? registerRequestDTO.getRole().toUpperCase()
                 : "USER";
 
+        if (repositoryUser.findByEmail(registerRequestDTO.getEmail()).isPresent()) {
+            throw new RuntimeException("The email is already registered");
+        }
+
 
         Optional<RoleEntity> roleOpt = roleRepository.findByName(EnumRoles.valueOf(role));
 

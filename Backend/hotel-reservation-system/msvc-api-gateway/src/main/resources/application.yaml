@@ -1,43 +1,42 @@
 
+
 spring:
   main:
     web-application-type: reactive
 
   cloud:
     gateway:
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowed-origins: "http://localhost:5173"
-            allowed-methods: "*"
-            allowed-headers: "*"
-            allow-credentials: true
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowed-origins: "http://localhost:5173"
+                allowed-methods: "*"
+                allowed-headers: "*"
+                allow-credentials: true
 
-      routes:
-        - id: msvc-users
-          uri: http://localhost:8004
-          predicates:
-            - Path=/users, /users/**
-
-        - id: auth
-          uri: http://localhost:8004
-          predicates:
-            - Path=/auth, /auth/**
-
-        - id: msvc-rooms
-          uri: http://localhost:8001
-          predicates:
-            - Path=/rooms, /rooms/**
-
-        - id: msvc-hotels
-          uri: http://localhost:8002
-          predicates:
-            - Path=/hotels, /hotels/**
-
-        - id: msvc-reservations
-          uri: http://localhost:8003
-          predicates:
-            - Path=/reservations, /reservations/**
+          routes:
+            - id: msvc-users
+              uri: http://localhost:8004
+              predicates:
+                - Path=/users/**
+            - id: auth
+              uri: http://localhost:8004
+              predicates:
+                - Path=/auth/**
+            - id: msvc-rooms
+              uri: http://localhost:8001
+              predicates:
+                - Path=/rooms/**
+            - id: msvc-hotels
+              uri: http://localhost:8002
+              predicates:
+                - Path=/hotels/**
+            - id: msvc-reservations
+              uri: http://localhost:8003
+              predicates:
+                - Path=/reservations/**
 
 
 

@@ -25,15 +25,13 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
-
         if (path.contains("/auth")) {
             return chain.filter(exchange);
         }
 
-        // Leer header Authorization
+
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("Missing or invalid Authorization header");
             return this.onError(exchange, "Missing or invalid Authorization header", HttpStatus.UNAUTHORIZED);
         }
 
