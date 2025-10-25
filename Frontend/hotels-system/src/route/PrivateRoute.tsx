@@ -1,21 +1,21 @@
 import { UserContext } from "@/context/UserContext";
-import { use, type JSX } from "react";
 import { Navigate } from "react-router";
+import { useContext, type JSX } from "react";
 
 
 interface Props {
-    element: JSX.Element; 
+    children: JSX.Element;
 }
 
-export const PrivateRoute = ({ element }: Props) => {
-    const { authStatus } = use(UserContext);
+export const PrivateRoute = ({ children }: Props) => {
+    const { authStatus } = useContext(UserContext);
 
-    if (authStatus === 'checking') {
+    if (authStatus === "checking") {
         return null;
     }
 
-    if (authStatus === 'authenticated') {
-        return element;
+    if (authStatus === "authenticated") {
+        return children;
     }
 
     return <Navigate to="/login" replace />;

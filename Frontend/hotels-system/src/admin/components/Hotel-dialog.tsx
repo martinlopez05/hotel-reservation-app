@@ -1,5 +1,5 @@
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Hotel } from "@/Hotels/data/hotel.interface"
 import { toast } from "react-toastify"
+import { UserContext } from "@/context/UserContext"
 
 type HotelDialogProps = {
     open: boolean
@@ -38,6 +39,8 @@ export function HotelDialog({ open, onOpenChange, hotel, onSuccess }: HotelDialo
         email: "",
         phone: "",
     })
+
+    const { user } = use(UserContext);
 
     useEffect(() => {
         if (hotel) {
@@ -73,12 +76,13 @@ export function HotelDialog({ open, onOpenChange, hotel, onSuccess }: HotelDialo
 
 
         try {
-            const url = hotel ? `${BASE_URL_HOTEL}/hotels/${hotel.id}` : `${BASE_URL_HOTEL}/hotels`
+            const url = hotel ? `${BASE_URL_HOTEL}/${hotel.id}` : `${BASE_URL_HOTEL}`
             const method = hotel ? "PUT" : "POST"
 
             const response = await fetch(url, {
                 method,
                 headers: {
+                    "Authorization": `Bearer ${user ? user.token : 0}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(formData),
@@ -86,10 +90,10 @@ export function HotelDialog({ open, onOpenChange, hotel, onSuccess }: HotelDialo
 
             if (response.ok) {
                 if (method === 'POST') {
-                    toast.success('Hotel creada correctamente')
+                    toast.success('Hotel creado correctamente')
                 }
                 if (method === 'PUT') {
-                    toast.success('Hotel editada correctamente')
+                    toast.success('Hotel editado correctamente')
                 }
                 onSuccess()
             }

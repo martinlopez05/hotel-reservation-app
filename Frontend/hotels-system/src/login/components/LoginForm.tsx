@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, use } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,18 +19,23 @@ const LoginForm = () => {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const { login } = useContext(UserContext);
+    const { login } = use(UserContext);
     const navigate = useNavigate();
+
+    const BASE_URL = import.meta.env.VITE_API_URL_AUTH;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
         try {
-            const resp = await fetch("http://localhost:8004/auth/login", {
+            const resp = await fetch(`${BASE_URL}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({
+                    username: email,
+                    password: password,
+                }),
             });
 
             if (!resp.ok) throw new Error("Error en la autenticación");
@@ -41,7 +46,7 @@ const LoginForm = () => {
             navigate("/");
         } catch (error) {
             console.error(error);
-            toast.error("Email o contraseña incorrecta");
+            toast.error("usuario o contraseña incorrecta");
         } finally {
             setIsLoading(false);
         }
@@ -53,18 +58,18 @@ const LoginForm = () => {
                 <CardHeader>
                     <CardTitle className="text-center text-2xl">Iniciar Sesión</CardTitle>
                     <CardDescription className="text-center">
-                        Ingresa tu email y contraseña para acceder
+                        Ingresa tu usuario y contraseña para acceder
                     </CardDescription>
                 </CardHeader>
 
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
+                            <Label htmlFor="email">Usuario</Label>
                             <Input
                                 id="email"
-                                type="email"
-                                placeholder="email..."
+                                type="text"
+                                placeholder="usuario o email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required

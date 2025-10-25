@@ -6,14 +6,14 @@ import {
 } from '@tanstack/react-query'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { UserContextprovider } from './context/UserContext';
+import { UserContextProvider } from './context/UserContext';
 
 const queryClient = new QueryClient()
 
 const App = () => {
     return (
         <>
-            <UserContextprovider>
+            <UserContextProvider>
                 <QueryClientProvider client={queryClient}>
                     <RouterProvider router={appRouter} />
                 </QueryClientProvider>
@@ -26,7 +26,7 @@ const App = () => {
                     pauseOnHover
                     draggable
                 />
-            </UserContextprovider>
+            </UserContextProvider>
         </>
 
     )

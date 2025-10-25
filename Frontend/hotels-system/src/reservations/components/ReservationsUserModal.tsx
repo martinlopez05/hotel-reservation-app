@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { use, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +8,7 @@ import { Calendar, DollarSign, Hash, Hotel, User, X } from "lucide-react"
 import type { ReservationResponse } from "../data/reservation.response"
 import { useDeleteReservation } from "../hooks/useDeleteReservation"
 import dayjs from "dayjs";
+import { UserContext } from "@/context/UserContext"
 
 
 interface MyReservationsModalProps {
@@ -20,7 +21,9 @@ export function MyReservationsModal({ isOpen, onClose, reservations }: MyReserva
     const [cancelModalOpen, setCancelModalOpen] = useState(false)
     const [selectedReservation, setSelectedReservation] = useState<ReservationResponse | null>(null)
 
-    const { mutate: deleteReservation } = useDeleteReservation();
+    const { user } = use(UserContext);
+
+    const { mutate: deleteReservation } = useDeleteReservation(user.token);
 
     const formatDate = (dateString: string) => {
         return dayjs(dateString).format("DD [de] MMMM [de] YYYY");

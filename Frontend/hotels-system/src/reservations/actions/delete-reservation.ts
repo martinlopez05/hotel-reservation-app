@@ -1,6 +1,9 @@
-import { toast } from "react-toastify";
 import { reservationApi } from "../reservationApi"
 
-export const deleteReservation = async (id: string) => {
-    await reservationApi.delete(`${id}`);
+export const deleteReservation = async (id: string, token: string) => {
+    await reservationApi.delete(`${id}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
 };

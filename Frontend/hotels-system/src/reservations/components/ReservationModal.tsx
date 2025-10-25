@@ -1,6 +1,4 @@
-"use client"
-
-import { useState, useMemo } from "react"
+import { useState, useMemo, use, useContext } from "react"
 import {
     Dialog,
     DialogContent,
@@ -14,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Calendar } from "lucide-react"
 import type { ReservationData } from "../data/reservationData"
 import { useCreateReservation } from "../hooks/useCreateReservation"
+import { UserContext } from "@/context/UserContext"
+import { Navigate, useNavigate } from "react-router"
 
 interface ReservationModalProps {
     isOpen: boolean
@@ -55,7 +55,14 @@ export default function ReservationModal({
         }
     }, [checkInDate, checkOutDate, pricePerNight])
 
-    const { mutate: createReservation } = useCreateReservation();
+
+    const { user, authStatus } = useContext(UserContext);
+
+    if (authStatus === "checking") return null;
+    if (!user) return <Navigate to="/login" replace />;
+
+    const { mutate: createReservation } = useCreateReservation(user.token);
+
 
     const handleConfirm = () => {
         const reservationData: ReservationData = {

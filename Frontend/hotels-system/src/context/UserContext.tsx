@@ -1,5 +1,5 @@
 import type { User } from "@/Hotels/data/user.interface";
-import { createContext, useEffect, useState, type PropsWithChildren } from "react";
+import { createContext, useState, type PropsWithChildren } from "react";
 
 
 
@@ -18,43 +18,40 @@ interface UserContextProps {
 
 export const UserContext = createContext({} as UserContextProps);
 
-export const UserContextprovider = ({ children }: PropsWithChildren) => {
+export const UserContextProvider = ({ children }: PropsWithChildren) => {
+    const storedUser = localStorage.getItem('user');
+    const initialUser = storedUser ? JSON.parse(storedUser) : null;
 
-    const [authStatus, setAuthStatus] = useState<AuthStatus>('checking');
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User | null>(initialUser);
+    const [authStatus, setAuthStatus] = useState<AuthStatus>(
+        initialUser ? 'authenticated' : 'not-authenticated'
+    );
 
     const handleLogin = (user: User) => {
-        const userWithRole = { ...user, role: user.role || "USER" };
+        const userWithRole = { ...user, role: user.role || 'ROLE_USER' };
         setUser(userWithRole);
         setAuthStatus('authenticated');
-        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('user', JSON.stringify(userWithRole));
         return true;
-    }
+    };
 
     const handleLogout = () => {
         setUser(null);
         setAuthStatus('not-authenticated');
         localStorage.removeItem('user');
-    }
+    };
 
-
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            const parsedUser: User = JSON.parse(storedUser);
-            setUser(parsedUser);
-            setAuthStatus('authenticated');
-        } else {
-            setAuthStatus('not-authenticated');
-        }
-    }, []);
-
-    return (<UserContext value={{
-        authStatus: authStatus,
-        isauthenticated: authStatus === 'authenticated',
-        user: user,
-        login: handleLogin,
-        logout: handleLogout
-    }}>{children}</UserContext>);
-
-}
+    return (
+        <UserContext.Provider
+            value={{
+                authStatus,
+                isauthenticated: authStatus === 'authenticated',
+                user,
+                login: handleLogin,
+                logout: handleLogout,
+            }}
+        >
+            {children}
+        </UserContext.Provider>
+    );
+};

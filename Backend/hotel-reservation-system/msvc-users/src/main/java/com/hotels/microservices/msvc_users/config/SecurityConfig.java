@@ -37,8 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(http ->
                         http
                                 .requestMatchers("/auth/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/users/**").hasRole("ADMIN")
-                                .anyRequest().authenticated()
+                                .anyRequest().permitAll()
 
                 )
                 .addFilterBefore(new JwtTokenValidator(jwtUtil), BasicAuthenticationFilter.class);

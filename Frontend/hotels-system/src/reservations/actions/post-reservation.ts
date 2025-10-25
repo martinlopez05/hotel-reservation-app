@@ -2,12 +2,21 @@ import { reservationApi } from "../reservationApi";
 import type { ReservationData } from "../data/reservationData";
 import { toast } from 'react-toastify';
 
-export const createReservation = async (reservation: ReservationData) => {
+export const createReservation = async (reservation: ReservationData, token: string) => {
     try {
-        const response = await reservationApi.post('', reservation);
-        toast.success("reserva creada correctamente");
+        const response = await reservationApi.post(
+            '',
+            reservation,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        toast.success("Reserva creada correctamente");
         return response.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         const status = error.response?.status;
 
@@ -16,6 +25,6 @@ export const createReservation = async (reservation: ReservationData) => {
         } else {
             toast.error('Ocurrió un error inesperado. Por favor, intentá de nuevo.');
         }
-
     }
 };
+

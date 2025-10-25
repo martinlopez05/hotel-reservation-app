@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,6 +7,7 @@ import { HotelDialog } from "./Hotel-dialog"
 import { DeleteDialog } from "./Delete-dialog"
 import type { Hotel } from "@/Hotels/data/hotel.interface"
 import { toast } from "react-toastify"
+import { UserContext } from "@/context/UserContext"
 
 
 export function HotelsTable() {
@@ -17,6 +18,9 @@ export function HotelsTable() {
     const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null)
     const [hotelToDelete, setHotelToDelete] = useState<number | null>(null)
 
+
+    const { user } = use(UserContext);
+
     const BASE_URL_HOTEL = import.meta.env.VITE_API_URL_HOTEL;
 
     useEffect(() => {
@@ -26,7 +30,12 @@ export function HotelsTable() {
     const fetchHotels = async () => {
         try {
             setLoading(true)
-            const response = await fetch(`${BASE_URL_HOTEL}/hotels`)
+            const response = await fetch(`${BASE_URL_HOTEL}`, {
+                headers: {
+                    "Authorization": `Bearer ${user ? user.token : 0}`,
+                    "Content-Type": "application/json",
+                }
+            })
             if (response.ok) {
                 const data = await response.json()
                 setHotels(data)
@@ -57,8 +66,12 @@ export function HotelsTable() {
         if (!hotelToDelete) return
 
         try {
-            const response = await fetch(`${BASE_URL_HOTEL}/hotels/${hotelToDelete}`, {
+            const response = await fetch(`${BASE_URL_HOTEL}/${hotelToDelete}`, {
                 method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${user ? user.token : 0}`,
+                    "Content-Type": "application/json",
+                },
             })
 
             if (response.ok) {

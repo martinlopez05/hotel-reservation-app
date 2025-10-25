@@ -43,7 +43,7 @@ const CustomHeader = ({ onReservationsClick }: HeaderProps) => {
                         </Button>
                     )}
 
-                    {user?.role === "ADMIN" ? (
+                    {user?.role === "ROLE_ADMIN" && (
                         <Button
                             variant="default"
                             size="sm"
@@ -51,19 +51,20 @@ const CustomHeader = ({ onReservationsClick }: HeaderProps) => {
                         >
                             Administración
                         </Button>
-                    ) : (
-                        onReservationsClick && (
-                            <Button
-                                onClick={onReservationsClick}
-                                variant="default"
-                                size="sm"
-                                className="gap-2"
-                            >
-                                <Calendar className="w-4 h-4" />
-                                Mis Reservas
-                            </Button>
-                        )
                     )}
+
+                    {onReservationsClick && (
+                        <Button
+                            onClick={onReservationsClick}
+                            variant="default"
+                            size="sm"
+                            className="gap-2"
+                        >
+                            <Calendar className="w-4 h-4" />
+                            Mis Reservas
+                        </Button>
+                    )}
+
                 </nav>
 
             </div >

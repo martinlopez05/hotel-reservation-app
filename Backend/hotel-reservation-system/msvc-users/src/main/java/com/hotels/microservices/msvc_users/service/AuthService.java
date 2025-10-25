@@ -52,6 +52,7 @@ public class AuthService {
         User user = repositoryUser.findByUsername(userDetails.getUsername()).orElseThrow( () -> new RuntimeException("User not found"));
 
         return AuthResponseDTO.builder()
+                .id(user.getId())
                 .username(userDetails.getUsername())
                 .role(role)
                 .email(user.getEmail())

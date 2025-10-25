@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,6 +9,7 @@ import { DeleteDialog } from "./Delete-dialog"
 import { RoomDialog } from "./Rooms-dialog"
 import { roomApi } from "@/Hotels/roomApi"
 import { toast } from "react-toastify"
+import { UserContext } from "@/context/UserContext"
 
 export function RoomsTable() {
     const [rooms, setRooms] = useState<Room[]>([])
@@ -21,10 +22,16 @@ export function RoomsTable() {
         fetchRooms()
     }, [])
 
+    const { user } = use(UserContext);
+
     const fetchRooms = async () => {
         try {
             setLoading(true)
-            const response = await roomApi.get('')
+            const response = await roomApi.get('', {
+                headers: {
+                    Authorization: `Bearer ${user?.token}`,
+                }
+            })
             if (response) {
                 const { data } = await response
                 setRooms(data)
@@ -56,7 +63,11 @@ export function RoomsTable() {
         if (!roomToDelete) return
 
         try {
-            await roomApi.delete(`/${roomToDelete}`)
+            await roomApi.delete(`/${roomToDelete}`, {
+                headers: {
+                    Authorization: `Bearer ${user?.token}`,
+                }
+            })
             toast.error('Habitacion eliminada correctamente')
         } catch (error) {
             toast.error('Error al eliminar habitación')

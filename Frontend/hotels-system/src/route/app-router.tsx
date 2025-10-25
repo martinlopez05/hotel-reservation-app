@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router';
+import { createBrowserRouter } from 'react-router';
 
 import Layout from '../layout/Layout';
 import HomePage from '../Hotels/pages/HomePage';
@@ -14,16 +14,29 @@ export const appRouter = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <PrivateRoute element={<HomePage />}></PrivateRoute>,
+                element: (
+                    <PrivateRoute>
+                        <HomePage />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: 'hotel/:idHotel',
-                element: <PrivateRoute element={<HotelPage></HotelPage>}></PrivateRoute>,
+                element: (
+                    <PrivateRoute>
+                        <HotelPage />
+                    </PrivateRoute>
+                ),
             },
             {
-                path: '*',
-                element: <Navigate to="/" />,
+                path: '/admin',
+                element: (
+                    <PrivateRoute>
+                        <AdminPage />
+                    </PrivateRoute>
+                ),
             },
+
         ],
     },
 
@@ -33,6 +46,8 @@ export const appRouter = createBrowserRouter([
     },
     {
         path: '/admin',
-        element: <PrivateRoute element={<AdminPage></AdminPage>}></PrivateRoute>
+        element: <PrivateRoute>
+            <AdminPage></AdminPage>
+        </PrivateRoute>
     }
 ]);

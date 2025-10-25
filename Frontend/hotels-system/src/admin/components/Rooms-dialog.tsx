@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -21,6 +21,7 @@ import type { Hotel } from "@/Hotels/data/hotel.interface"
 import type { Room } from "@/Hotels/data/room.interface"
 import { hotelApi } from "@/Hotels/hotelApi"
 import { toast } from "react-toastify"
+import { UserContext } from "@/context/UserContext"
 
 
 type RoomDialogProps = {
@@ -43,6 +44,8 @@ export function RoomDialog({ open, onOpenChange, room, onSuccess }: RoomDialogPr
         pricePerNight: 0,
         description: "",
     })
+
+    const { user } = use(UserContext);
 
     useEffect(() => {
         if (open) {
@@ -81,7 +84,11 @@ export function RoomDialog({ open, onOpenChange, room, onSuccess }: RoomDialogPr
 
     const fetchHotels = async () => {
         try {
-            const response = await hotelApi.get('')
+            const response = await hotelApi.get('', {
+                headers: {
+                    Authorization: `Bearer ${user?.token}`,
+                },
+            })
             const { data } = await response
             setHotels(data)
 
@@ -95,12 +102,13 @@ export function RoomDialog({ open, onOpenChange, room, onSuccess }: RoomDialogPr
         setLoading(true)
 
         try {
-            const url = room ? `${BASE_URL_ROOM}/rooms/${room.id}` : `${BASE_URL_ROOM}/rooms`
+            const url = room ? `${BASE_URL_ROOM}/${room.id}` : `${BASE_URL_ROOM}`
             const method = room ? "PUT" : "POST"
 
             const response = await fetch(url, {
                 method,
                 headers: {
+                    "Authorization": `Bearer ${user ? user.token : 0}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(formData),
