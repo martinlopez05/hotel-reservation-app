@@ -1,3 +1,4 @@
+import { CustomFooter } from '@/components/custom/CustomFooter'
 import CustomHeader from '@/components/custom/CustomHeader'
 import { ScrollToTop } from '@/components/custom/ScrollTop'
 import { UserContext } from '@/context/UserContext'
@@ -11,7 +12,7 @@ export const Layout = () => {
 
     const [isReservationsModalOpen, setIsReservationsModalOpen] = useState(false)
 
-    
+
     const { user } = use(UserContext);
 
     const { data: reservations } = useGetReservationsByUser(user ? user.id : 0);
@@ -24,6 +25,7 @@ export const Layout = () => {
             <main className="p-0">
                 <Outlet />
             </main>
+            <CustomFooter></CustomFooter>
             <MyReservationsModal
                 isOpen={isReservationsModalOpen}
                 onClose={() => setIsReservationsModalOpen(false)}

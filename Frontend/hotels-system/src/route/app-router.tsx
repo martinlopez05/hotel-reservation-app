@@ -6,6 +6,7 @@ import HotelPage from '../Hotels/pages/HotelPage';
 import LoginForm from '../login/components/LoginForm';
 import { PrivateRoute } from './PrivateRoute';
 import AdminPage from '@/admin/AdminPage';
+import RegisterPage from '@/login/components/Register';
 
 export const appRouter = createBrowserRouter([
     {
@@ -43,6 +44,10 @@ export const appRouter = createBrowserRouter([
     {
         path: '/login',
         element: <LoginForm></LoginForm>
+    },
+    {
+        path: '/register',
+        element: <RegisterPage></RegisterPage>
     },
     {
         path: '/admin',

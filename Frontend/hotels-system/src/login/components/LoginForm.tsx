@@ -11,7 +11,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { UserContext } from "@/context/UserContext";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 
 const LoginForm = () => {
@@ -98,9 +98,9 @@ const LoginForm = () => {
                         </Button>
                         <p className="text-center text-sm text-muted-foreground">
                             ¿No tienes cuenta?{" "}
-                            <a href="#" className="font-medium text-foreground hover:underline">
+                            <Link to="/register" className="font-medium text-foreground hover:underline">
                                 Regístrate
-                            </a>
+                            </Link>
                         </p>
                     </CardFooter>
                 </form>
