@@ -21,6 +21,7 @@
     <module>msvc-rooms</module>
     <module>msvc-users</module>
     <module>msvc-api-gateway</module>
+    <module>msvc-payments</module>
   </modules>
   <dependencies>
     <dependency>

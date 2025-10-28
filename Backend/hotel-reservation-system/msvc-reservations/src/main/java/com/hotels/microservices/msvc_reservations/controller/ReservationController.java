@@ -3,6 +3,7 @@ package com.hotels.microservices.msvc_reservations.controller;
 import com.hotels.microservices.msvc_reservations.dto.ReservationRequestDTO;
 import com.hotels.microservices.msvc_reservations.dto.ReservationResponseDTO;
 import com.hotels.microservices.msvc_reservations.model.Reservation;
+import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.service.IServiceReservation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,15 @@ public class ReservationController {
     public ResponseEntity<?> deleteReservation(@PathVariable String id){
         serviceReservation.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/state")
+    public ResponseEntity<ReservationResponseDTO> updateState(
+            @PathVariable String id,
+            @RequestParam String state) {
+        ReservationState newState = ReservationState.valueOf(state.toUpperCase());
+        ReservationResponseDTO updated = serviceReservation.updateState(id, newState);
+        return ResponseEntity.ok(updated);
     }
 
 

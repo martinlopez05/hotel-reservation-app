@@ -7,6 +7,7 @@ import com.hotels.microservices.msvc_reservations.client.UserClientRest;
 import com.hotels.microservices.msvc_reservations.dto.*;
 import com.hotels.microservices.msvc_reservations.mapper.IReservationMapper;
 import com.hotels.microservices.msvc_reservations.model.Reservation;
+import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.repository.IRepositoryReservation;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,11 +72,12 @@ public class ServiceReservation implements IServiceReservation{
 
         reservation.setPrice(roomDTO.getPricePerNight() * days);
         reservation.setOrderNumber(sequenceGenerator.generateSequence("reservationOrder"));
-
+        reservation.setState(ReservationState.PENDING);
         repositoryReservation.save(reservation);
 
         ReservationResponseDTO reservationResponseDTO = reservationMapper.toReservationResponse(reservation);
         enrichReservationDTO(reservationResponseDTO,reservation);
+
 
         return reservationResponseDTO;
 
@@ -130,6 +132,19 @@ public class ServiceReservation implements IServiceReservation{
         repositoryReservation.deleteById(id);
     }
 
+
+    @Override
+    public ReservationResponseDTO updateState(String reservationId, ReservationState newState) {
+        Reservation reservation = repositoryReservation.findById(reservationId)
+                .orElseThrow(() -> new EntityNotFoundException("Reservation not found"));
+
+        reservation.setState(newState);
+        repositoryReservation.save(reservation);
+
+        ReservationResponseDTO dto = reservationMapper.toReservationResponse(reservation);
+        enrichReservationDTO(dto, reservation);
+        return dto;
+    }
 
 
     private void enrichReservationDTO(ReservationResponseDTO dto, Reservation reservation) {

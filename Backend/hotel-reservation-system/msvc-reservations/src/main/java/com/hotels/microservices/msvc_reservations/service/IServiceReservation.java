@@ -2,6 +2,7 @@ package com.hotels.microservices.msvc_reservations.service;
 
 import com.hotels.microservices.msvc_reservations.dto.ReservationResponseDTO;
 import com.hotels.microservices.msvc_reservations.dto.ReservationRequestDTO;
+import com.hotels.microservices.msvc_reservations.model.ReservationState;
 
 import java.util.List;
 
@@ -16,5 +17,8 @@ public interface IServiceReservation {
     void deleteById(String id);
 
     List<ReservationResponseDTO> findByUserId(Long userId);
+
+    ReservationResponseDTO updateState(String reservationId, ReservationState newState);
+
 
 }

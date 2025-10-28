@@ -1,5 +1,7 @@
 package com.hotels.microservices.msvc_reservations.model;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +25,10 @@ public class Reservation {
     private Long hotelId;
     private Long userId;
     private Long orderNumber;
+
+    @Enumerated(EnumType.STRING)
+    private ReservationState state;
+
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private double price;

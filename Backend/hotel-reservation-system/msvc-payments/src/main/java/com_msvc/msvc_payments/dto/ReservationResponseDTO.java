@@ -1,6 +1,5 @@
-package com.hotels.microservices.msvc_reservations.dto;
+package com_msvc.msvc_payments.dto;
 
-import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -19,8 +18,7 @@ public class ReservationResponseDTO {
     private int roomNumber;
     private Long orderNumber;
 
-    @Enumerated(EnumType.STRING)
-    private ReservationState state;
+    private String state;
 
     private String username;
     private LocalDate checkInDate;
