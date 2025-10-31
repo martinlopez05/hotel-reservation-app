@@ -25,7 +25,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
-        if (path.contains("/auth")) {
+        if (path.contains("/auth") || path.equals("/payment/webhook")) {
             return chain.filter(exchange);
         }
 

@@ -22,6 +22,7 @@
     <module>msvc-users</module>
     <module>msvc-api-gateway</module>
     <module>msvc-payments</module>
+    <module>msvc-reviews</module>
   </modules>
   <dependencies>
     <dependency>

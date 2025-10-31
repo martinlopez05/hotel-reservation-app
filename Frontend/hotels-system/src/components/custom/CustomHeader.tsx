@@ -23,13 +23,16 @@ const CustomHeader = ({ onReservationsClick }: HeaderProps) => {
                     <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                         <span className="text-primary-foreground font-bold text-lg">H</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-foreground">Reservas de Hoteles</h1>
+                    <h1 className="text-2xl font-bold text-foreground">HotelFly</h1>
+                    <a href="/" className="ml-4 block text-sm text-muted-foreground hover:text-primary transition-colors">
+                        Inicio
+                    </a>
                 </div>
 
                 <nav className="flex items-center gap-4">
                     {user ? (
                         <>
-                            <span className="text-sm text-muted-foreground">Hola, {user.username}</span>
+                            <span className="text-sm text-muted-foreground">Hola,  {user.username}</span>
                             <Button variant="outline" size="sm" onClick={() => {
                                 logout();
                                 navigate('/login');

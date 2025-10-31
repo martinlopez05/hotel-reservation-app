@@ -1,5 +1,5 @@
 import type { User } from "@/Hotels/data/user.interface";
-import { createContext, useState, type PropsWithChildren } from "react";
+import { createContext, useEffect, useState, type PropsWithChildren } from "react";
 
 
 
@@ -19,13 +19,19 @@ interface UserContextProps {
 export const UserContext = createContext({} as UserContextProps);
 
 export const UserContextProvider = ({ children }: PropsWithChildren) => {
-    const storedUser = localStorage.getItem('user');
-    const initialUser = storedUser ? JSON.parse(storedUser) : null;
+    const [user, setUser] = useState<User | null>(null);
+    const [authStatus, setAuthStatus] = useState<AuthStatus>('checking');
 
-    const [user, setUser] = useState<User | null>(initialUser);
-    const [authStatus, setAuthStatus] = useState<AuthStatus>(
-        initialUser ? 'authenticated' : 'not-authenticated'
-    );
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const parsed = JSON.parse(storedUser);
+            setUser(parsed);
+            setAuthStatus('authenticated');
+        } else {
+            setAuthStatus('not-authenticated');
+        }
+    }, []);
 
     const handleLogin = (user: User) => {
         const userWithRole = { ...user, role: user.role || 'ROLE_USER' };
@@ -41,6 +47,10 @@ export const UserContextProvider = ({ children }: PropsWithChildren) => {
         localStorage.removeItem('user');
     };
 
+    if (authStatus === 'checking') {
+        return <div>Cargando sesión...</div>;
+    }
+
     return (
         <UserContext.Provider
             value={{
@@ -55,3 +65,4 @@ export const UserContextProvider = ({ children }: PropsWithChildren) => {
         </UserContext.Provider>
     );
 };
+

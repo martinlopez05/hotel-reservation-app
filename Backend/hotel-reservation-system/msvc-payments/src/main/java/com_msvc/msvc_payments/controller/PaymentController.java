@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/payment")
 public class PaymentController {
 
@@ -35,6 +34,11 @@ public class PaymentController {
     @Autowired
     IServicePayment servicePayment;
 
+
+    @GetMapping
+    public ResponseEntity<List<PaymentResponseDTO>> getPayments() {
+        return ResponseEntity.ok(servicePayment.findAll());
+    }
 
     @GetMapping("/reservation/{reservationId}")
     public ResponseEntity<PaymentResponseDTO> getByReservation(@PathVariable String reservationId) {
@@ -61,12 +65,12 @@ public class PaymentController {
             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                     .items(List.of(item))
                     .externalReference(request.getUserId() + ":" + request.getReservationId())
-                    .notificationUrl("https://af4b225d1941.ngrok-free.app/payment/webhook") // url con ngrok
+                    .notificationUrl("https://e1ed73df2bf9.ngrok-free.app/payment/webhook") // url con ngrok
                     .backUrls(
                             PreferenceBackUrlsRequest.builder()
-                                    .success("https://httpstat.us/200?s=success") //url publicas
-                                    .failure("https://httpstat.us/200?s=failure")
-                                    .pending("https://httpstat.us/200?s=pending")
+                                    .success("https://782b1e6a55fb.ngrok-free.app") //url publicas
+                                    .failure("https://782b1e6a55fb.ngrok-free.app")
+                                    .pending("https://782b1e6a55fb.ngrok-free.app")
                                     .build()
                     )
                     .autoReturn("approved")

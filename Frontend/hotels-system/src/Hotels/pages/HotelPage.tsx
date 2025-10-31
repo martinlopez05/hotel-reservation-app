@@ -9,6 +9,7 @@ import { use, useState } from "react"
 import { Button } from "@/components/ui/button"
 import ReservationModal from "@/reservations/components/ReservationModal"
 import { UserContext } from "@/context/UserContext"
+import { HotelReviews } from "../components/HotelReviews"
 
 
 
@@ -176,6 +177,10 @@ export default function HotelPage() {
                         ))}
                     </div>
                 </div>
+                <div className="mt-50">
+                    <HotelReviews hotelId={+idHotel} ></HotelReviews>
+                </div>
+
             </main>
             {selectedRoom && (
                 <ReservationModal

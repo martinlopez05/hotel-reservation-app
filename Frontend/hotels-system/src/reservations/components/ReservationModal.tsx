@@ -134,13 +134,14 @@ export default function ReservationModal({
                                 <span className="text-xl font-bold text-primary">${totalPrice}</span>
                             </div>
                             <p className="text-xs text-muted-foreground text-center pt-2 border-t border-border">
-                                💳 El pago se abona estando en el hotel
+                                💳 El pago se abona en efectivo estando en el hotel o puede pagar por mercado pago desde el apartado
+                                "Mis reservas"
                             </p>
                         </div>
                     )}
                 </div>
 
-                <DialogFooter className="gap-2 sm:gap-0">
+                <DialogFooter className="gap-4 sm:gap-1">
                     <Button variant="outline" onClick={onClose}>
                         Cancelar
                     </Button>

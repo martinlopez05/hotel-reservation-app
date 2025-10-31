@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ServicePayment implements IServicePayment {
@@ -66,6 +68,38 @@ public class ServicePayment implements IServicePayment {
 
         return response;
     }
+
+
+    @Override
+    public List<PaymentResponseDTO> findAll() {
+        List<Payment> payments = repositoryPayment.findAll();
+        List<PaymentResponseDTO> paymentsResponse = new ArrayList<>();
+
+        for(Payment payment : payments){
+            PaymentResponseDTO response = PaymentResponseDTO.builder()
+                    .id(payment.getId())
+                    .mpPaymentId(payment.getMpPaymentId())
+                    .userId(payment.getUserId())
+                    .reservationId(payment.getReservationId())
+                    .amount(payment.getAmount())
+                    .status(payment.getStatus())
+                    .paymentMethod(payment.getPaymentMethod())
+                    .registrationDate(payment.getRegistrationDate())
+                    .build();
+
+            if (payment.getMpPaymentId() != null) {
+                response.setMpPaymentId(payment.getMpPaymentId());
+            }
+
+            paymentsResponse.add(response);
+
+        }
+
+        return paymentsResponse;
+
+
+    }
+
 
 
     public PaymentResponseDTO findByReservation(String reservationId) {

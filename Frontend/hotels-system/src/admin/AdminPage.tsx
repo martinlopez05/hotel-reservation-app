@@ -2,6 +2,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { HotelsTable } from "./components/Hotel-table"
 import { RoomsTable } from "./components/Rooms-table"
+import { ReservationsTable } from "./components/Reservation-table"
+import { PaymentsTable } from "./components/Payment-table"
 
 export default function AdminPage() {
     return (
@@ -12,9 +14,11 @@ export default function AdminPage() {
             </div>
 
             <Tabs defaultValue="hotels" className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-2">
+                <TabsList className="grid w-full max-w-md grid-cols-4">
                     <TabsTrigger value="hotels">Hoteles</TabsTrigger>
                     <TabsTrigger value="rooms">Habitaciones</TabsTrigger>
+                    <TabsTrigger value="reservation">Reservas</TabsTrigger>
+                    <TabsTrigger value="payment">Pagos</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="hotels" className="mt-6">
@@ -23,6 +27,14 @@ export default function AdminPage() {
 
                 <TabsContent value="rooms" className="mt-6">
                     <RoomsTable />
+                </TabsContent>
+
+                <TabsContent value="reservation" className="mt-6">
+                    <ReservationsTable />
+                </TabsContent>
+
+                <TabsContent value="payment" className="mt-6">
+                    <PaymentsTable />
                 </TabsContent>
             </Tabs>
         </div>

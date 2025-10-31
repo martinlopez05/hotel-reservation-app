@@ -4,8 +4,11 @@ import com_msvc.msvc_payments.dto.PaymentRequestDTO;
 import com_msvc.msvc_payments.dto.PaymentResponseDTO;
 import com_msvc.msvc_payments.model.Payment;
 
+import java.util.List;
+
 public interface IServicePayment {
 
+    List<PaymentResponseDTO> findAll();
     PaymentResponseDTO findByReservation(String reservationId);
     PaymentResponseDTO saveManualPayment(PaymentRequestDTO dto);
     void savePaymentFromMP(com.mercadopago.resources.payment.Payment mpPayment);

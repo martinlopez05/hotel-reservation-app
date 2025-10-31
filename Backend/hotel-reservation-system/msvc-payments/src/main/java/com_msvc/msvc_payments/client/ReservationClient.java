@@ -1,6 +1,5 @@
 package com_msvc.msvc_payments.client;
 
-import com_msvc.msvc_payments.ReservationState;
 import com_msvc.msvc_payments.dto.ReservationResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;

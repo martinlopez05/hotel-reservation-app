@@ -11,7 +11,9 @@ spring:
           globalcors:
             cors-configurations:
               '[/**]':
-                allowed-origins: "http://localhost:5173"
+                allowed-origins:
+                  - "http://localhost:5173"
+                  - "https://782b1e6a55fb.ngrok-free.app"
                 allowed-methods: "*"
                 allowed-headers: "*"
                 allow-credentials: true
@@ -37,6 +39,14 @@ spring:
               uri: http://localhost:8003
               predicates:
                 - Path=/reservations/**
+            - id: msvc-payments
+              uri: http://localhost:8005
+              predicates:
+                - Path=/payment/**
+            - id: msvc-reviews
+              uri: http://localhost:8006
+              predicates:
+                - Path=/review/**
 
 
 
