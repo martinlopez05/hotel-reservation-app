@@ -3,7 +3,8 @@ export interface ReservationResponse {
     hotelName: string
     roomNumber: number
     orderNumber: number
-    state : string
+    userId: number
+    state: string
     username: string
     checkInDate: string
     checkOutDate: string

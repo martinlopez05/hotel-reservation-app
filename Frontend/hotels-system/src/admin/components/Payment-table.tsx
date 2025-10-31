@@ -18,9 +18,11 @@ export function PaymentsTable() {
         }
     }
 
+    const [loading, setLoading] = useState(true);
     const [payments, setPayments] = useState<PaymentResponse[]>([]);
 
     const BASE_URL = import.meta.env.VITE_API_URL_PAYMENT;
+
 
     const { user } = use(UserContext);
 
@@ -30,8 +32,11 @@ export function PaymentsTable() {
     }, [])
 
 
+
+
     const fecthPayments = async () => {
         try {
+            setLoading(true);
             const response = await fetch(`${BASE_URL}`, {
                 headers: {
                     'Authorization': `Bearer ${user.token}`
@@ -44,8 +49,14 @@ export function PaymentsTable() {
         } catch (error) {
             console.log(error);
         }
+        finally {
+            setLoading(false);
+        }
     }
 
+    if (loading) {
+        return <div className="text-center py-8">Cargando pagos...</div>
+    }
 
     const getPaymentMethodBadge = (method: PaymentMethod) => {
         switch (method) {
@@ -102,6 +113,7 @@ export function PaymentsTable() {
                                 <TableHead>MP Payment ID</TableHead>
                                 <TableHead>User ID</TableHead>
                                 <TableHead>Reservation ID</TableHead>
+                                <TableHead>Orden reserva</TableHead>
                                 <TableHead>Monto</TableHead>
                                 <TableHead>Estado</TableHead>
                                 <TableHead>Método de Pago</TableHead>
@@ -122,6 +134,7 @@ export function PaymentsTable() {
                                         <TableCell>{payment.mpPaymentId ? payment.mpPaymentId : "-"}</TableCell>
                                         <TableCell>{payment.userId}</TableCell>
                                         <TableCell className="font-medium text-sm">{payment.reservationId}</TableCell>
+                                        <TableCell className="font-medium text-sm">#{payment.orderReservation}</TableCell>
                                         <TableCell className="font-semibold">{formatCurrency(payment.amount)}</TableCell>
                                         <TableCell>{getStatusBadge(payment.status)}</TableCell>
                                         <TableCell>{getPaymentMethodBadge(payment.paymentMethod)}</TableCell>

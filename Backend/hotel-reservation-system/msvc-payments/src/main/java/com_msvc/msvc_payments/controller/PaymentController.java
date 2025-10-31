@@ -48,6 +48,7 @@ public class PaymentController {
     @PostMapping
     public ResponseEntity<PaymentResponseDTO> createManualPayment(@RequestBody PaymentRequestDTO dto) {
         PaymentResponseDTO paymentResponseDTO = servicePayment.saveManualPayment(dto);
+        servicePayment.editReservation(paymentResponseDTO.getReservationId(), "PAYMENT");
         return ResponseEntity.ok(paymentResponseDTO);
     }
 
@@ -65,12 +66,12 @@ public class PaymentController {
             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                     .items(List.of(item))
                     .externalReference(request.getUserId() + ":" + request.getReservationId())
-                    .notificationUrl("https://e1ed73df2bf9.ngrok-free.app/payment/webhook") // url con ngrok
+                    .notificationUrl("https://0ac3175ceb7f.ngrok-free.app/payment/webhook") // url con ngrok
                     .backUrls(
                             PreferenceBackUrlsRequest.builder()
-                                    .success("https://782b1e6a55fb.ngrok-free.app") //url publicas
-                                    .failure("https://782b1e6a55fb.ngrok-free.app")
-                                    .pending("https://782b1e6a55fb.ngrok-free.app")
+                                    .success("https://546e1a71878a.ngrok-free.app") //url publicas
+                                    .failure("https://546e1a71878a.ngrok-free.app")
+                                    .pending("https://546e1a71878a.ngrok-free.app")
                                     .build()
                     )
                     .autoReturn("approved")

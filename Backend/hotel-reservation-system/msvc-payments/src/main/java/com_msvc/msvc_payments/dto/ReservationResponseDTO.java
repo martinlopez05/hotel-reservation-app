@@ -17,7 +17,7 @@ public class ReservationResponseDTO {
     private String hotelName;
     private int roomNumber;
     private Long orderNumber;
-
+    private Long userId;
     private String state;
 
     private String username;

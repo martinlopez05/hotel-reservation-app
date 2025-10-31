@@ -4,11 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { UserContext } from "@/context/UserContext"
 import type { ReservationResponse } from "@/reservations/data/reservation.response"
+import { Button } from "@/components/ui/button"
+import { PaymentModal } from "./PaymentModal"
+import dayjs from "dayjs"
+import "dayjs/locale/es";
 
+dayjs.locale("es");
 
 export function ReservationsTable() {
     const [reservations, setReservations] = useState<ReservationResponse[]>([])
     const [loading, setLoading] = useState(true)
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [selectedReservation, setSelectedReservation] = useState<ReservationResponse>(null);
+
 
     const BASE_URL = import.meta.env.VITE_API_URL_RESERVATION;
 
@@ -37,12 +45,21 @@ export function ReservationsTable() {
         }
     }
 
+    const handlePaymentSuccess = (reservationId: string) => {
+        setReservations(prev =>
+            prev.map(r =>
+                r.id === reservationId ? { ...r, state: "PAYMENT" } : r
+            )
+        );
+    };
+
+    const handlePay = (reservation: ReservationResponse) => {
+        setSelectedReservation(reservation);
+        setIsPaymentModalOpen(true);
+    };
+
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("es-ES", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        })
+        return dayjs(dateString).format("DD [de] MMMM [de] YYYY")
     }
 
     const formatPrice = (price: number) => {
@@ -95,6 +112,7 @@ export function ReservationsTable() {
                                 <TableHead>Estado</TableHead>
                                 <TableHead className="text-right">Precio</TableHead>
                                 <TableHead>Fecha Registro</TableHead>
+                                <TableHead></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -116,11 +134,32 @@ export function ReservationsTable() {
                                         <TableCell>{getStateBadge(reservation.state)}</TableCell>
                                         <TableCell className="text-right font-medium">{formatPrice(reservation.price)}</TableCell>
                                         <TableCell className="text-muted-foreground">{formatDate(reservation.registrationDate)}</TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {reservation.state === "PENDING" && (
+                                                <Button
+                                                    onClick={() => handlePay(reservation)}
+                                                    className="bg-primary text-white px-3 py-1 rounded-md"
+                                                >
+                                                    Registrar pago
+                                                </Button>
+                                            )}
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             )}
                         </TableBody>
                     </Table>
+                    {selectedReservation && (
+                        <PaymentModal
+                            isOpen={isPaymentModalOpen}
+                            onClose={() => setIsPaymentModalOpen(false)}
+                            reservationId={selectedReservation.id}
+                            orderReservation={selectedReservation.orderNumber}
+                            amount={selectedReservation.price}
+                            userId={selectedReservation.userId}
+                            onPaymentSuccess={() => handlePaymentSuccess(selectedReservation.id)}
+                        />
+                    )}
                 </div>
             </CardContent>
         </Card>

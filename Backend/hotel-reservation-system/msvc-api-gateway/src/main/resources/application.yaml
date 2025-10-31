@@ -13,7 +13,7 @@ spring:
               '[/**]':
                 allowed-origins:
                   - "http://localhost:5173"
-                  - "https://782b1e6a55fb.ngrok-free.app"
+                  - "https://546e1a71878a.ngrok-free.app"
                 allowed-methods: "*"
                 allowed-headers: "*"
                 allow-credentials: true

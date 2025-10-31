@@ -3,6 +3,7 @@ export interface PaymentResponse {
     mpPaymentId: number | null;
     userId: number;
     reservationId: string;
+    orderReservation: number;
     amount: number;
     status: StatusPayment;
     paymentMethod: PaymentMethod;

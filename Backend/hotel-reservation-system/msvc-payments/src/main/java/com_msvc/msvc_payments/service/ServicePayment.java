@@ -3,6 +3,7 @@ package com_msvc.msvc_payments.service;
 import com_msvc.msvc_payments.client.ReservationClient;
 import com_msvc.msvc_payments.dto.PaymentRequestDTO;
 import com_msvc.msvc_payments.dto.PaymentResponseDTO;
+import com_msvc.msvc_payments.dto.ReservationResponseDTO;
 import com_msvc.msvc_payments.model.Payment;
 import com_msvc.msvc_payments.repository.IRepositoryPayment;
 import jakarta.persistence.EntityNotFoundException;
@@ -75,12 +76,15 @@ public class ServicePayment implements IServicePayment {
         List<Payment> payments = repositoryPayment.findAll();
         List<PaymentResponseDTO> paymentsResponse = new ArrayList<>();
 
+
         for(Payment payment : payments){
+            ReservationResponseDTO reservationResponseDTO = reservationClient.getReservation(payment.getReservationId()).getBody();
             PaymentResponseDTO response = PaymentResponseDTO.builder()
                     .id(payment.getId())
                     .mpPaymentId(payment.getMpPaymentId())
                     .userId(payment.getUserId())
                     .reservationId(payment.getReservationId())
+                    .orderReservation(reservationResponseDTO.getOrderNumber())
                     .amount(payment.getAmount())
                     .status(payment.getStatus())
                     .paymentMethod(payment.getPaymentMethod())

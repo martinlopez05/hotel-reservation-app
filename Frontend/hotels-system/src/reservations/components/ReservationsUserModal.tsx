@@ -7,8 +7,11 @@ import { Calendar, DollarSign, Hash, Hotel, User, X } from "lucide-react"
 import type { ReservationResponse } from "../data/reservation.response"
 import { useDeleteReservation } from "../hooks/useDeleteReservation"
 import dayjs from "dayjs"
+import "dayjs/locale/es";
 import { UserContext } from "@/context/UserContext"
 import type { InitPoint } from "../data/payment.response.initpoint"
+
+dayjs.locale("es");
 
 interface MyReservationsModalProps {
   isOpen: boolean
@@ -76,7 +79,6 @@ export function MyReservationsModal({ isOpen, onClose, reservations }: MyReserva
         body: JSON.stringify(payment)
       });
 
-      // Podés manejar la respuesta
       if (!response.ok) {
         console.error('Error en el pago:', response.statusText);
         return;

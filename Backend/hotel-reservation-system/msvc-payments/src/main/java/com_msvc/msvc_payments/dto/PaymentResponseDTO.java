@@ -17,6 +17,7 @@ public class PaymentResponseDTO {
     private Long mpPaymentId;
     private Long userId;
     private String reservationId;
+    private Long orderReservation;
     private double amount;
     private String status;
     private String paymentMethod;

@@ -18,6 +18,7 @@ public class ReservationResponseDTO {
     private String hotelName;
     private int roomNumber;
     private Long orderNumber;
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     private ReservationState state;

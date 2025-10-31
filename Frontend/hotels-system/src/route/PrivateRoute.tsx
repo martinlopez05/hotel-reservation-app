@@ -11,7 +11,12 @@ export const PrivateRoute = ({ children }: Props) => {
     const { authStatus } = useContext(UserContext);
 
     if (authStatus === "checking") {
-        return null;
+        return (
+            <div className="loading-container">
+                <span className="spinner" />
+                <p>Verificando sesión...</p>
+            </div>
+        );
     }
 
     if (authStatus === "authenticated") {
