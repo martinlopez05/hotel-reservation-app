@@ -1,0 +1,284 @@
+services:
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: ./eureka-server/Dockerfile
+    container_name: eureka-server
+    restart: always
+    env_file: .env
+    ports:
+      - "${EUREKA_PORT}:8761"
+    networks:
+      - hotel-net
+
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./msvc-api-gateway/Dockerfile
+    container_name: api-gateway
+    env_file: .env
+    ports:
+      - "${GATEWAY_PORT}:8090"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
+      - SECURITY_JWT_SECRET=${JWT_SECRET}
+      - SECURITY_JWT_USER_GENERATOR=${JWT_GENERATOR}
+    networks:
+      - hotel-net
+
+
+  msvc-hotels:
+    build:
+      context: .
+      dockerfile: ./msvc-hotels/Dockerfile
+    container_name: msvc-hotels
+    env_file: .env
+    depends_on:
+      - mysql-hotels
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${HOTELS_DB_HOST}:${HOTELS_DB_PORT}/${HOTELS_DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=${HOTELS_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${HOTELS_DB_PASS}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${HOTELS_DB_DIALECT}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
+      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST}
+      - SPRING_RABBITMQ_PORT=${RABBITMQ_PORT}
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "8002:8002"
+    networks:
+      - hotel-net
+
+  mysql-hotels:
+    image: mysql:8
+    container_name: mysql-hotels
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${HOTELS_DB_PASS}
+      - MYSQL_DATABASE=${HOTELS_DB_NAME}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_hotels_data:/var/lib/mysql
+    networks:
+      - hotel-net
+
+  msvc-rooms:
+    build:
+      context: .
+      dockerfile: ./msvc-rooms/Dockerfile
+    container_name: msvc-rooms
+    env_file: .env
+    depends_on:
+      - postgres-rooms
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${ROOMS_DB_HOST}:${ROOMS_DB_PORT}/${ROOMS_DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${ROOMS_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${ROOMS_DB_PASS}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${ROOMS_DB_DIALECT}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
+      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST}
+      - SPRING_RABBITMQ_PORT=${RABBITMQ_PORT}
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "8001:8001"
+    networks:
+      - hotel-net
+
+  postgres-rooms:
+    image: postgres:15
+    container_name: postgres-rooms
+    restart: always
+    environment:
+      - POSTGRES_USER=${ROOMS_DB_USER}
+      - POSTGRES_PASSWORD=${ROOMS_DB_PASS}
+      - POSTGRES_DB=${ROOMS_DB_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_rooms_data:/var/lib/postgresql/data
+    networks:
+      - hotel-net
+
+
+  msvc-reservations:
+    build:
+      context: .
+      dockerfile: ./msvc-reservations/Dockerfile
+    container_name: msvc-reservations
+    env_file: .env
+    depends_on:
+      - mongo-reservations
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://${RESERVATIONS_DB_HOST}:${RESERVATIONS_DB_PORT}/${RESERVATIONS_DB_NAME}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
+      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST}
+      - SPRING_RABBITMQ_PORT=${RABBITMQ_PORT}
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "8003:8003"
+    networks:
+      - hotel-net
+
+  mongo-reservations:
+    image: mongo:6
+    container_name: mongo-reservations
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_reservations_data:/data/db
+    networks:
+      - hotel-net
+
+
+  msvc-users:
+    build:
+      context: .
+      dockerfile: ./msvc-users/Dockerfile
+    container_name: msvc-users
+    env_file: .env
+    depends_on:
+      - mysql-users
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${USERS_DB_HOST}:${USERS_DB_PORT}/${USERS_DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=${USERS_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${USERS_DB_PASS}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${USERS_DB_DIALECT}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
+      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST}
+      - SPRING_RABBITMQ_PORT=${RABBITMQ_PORT}
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+      - SECURITY_JWT_SECRET=${JWT_SECRET}
+      - SECURITY_JWT_USER_GENERATOR=${JWT_GENERATOR}
+    ports:
+      - "8004:8004"
+    networks:
+      - hotel-net
+
+  mysql-users:
+    image: mysql:8
+    container_name: mysql-users
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${USERS_DB_PASS}
+      - MYSQL_DATABASE=${USERS_DB_NAME}
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_users_data:/var/lib/mysql
+    networks:
+      - hotel-net
+
+
+  msvc-payments:
+    build:
+      context: .
+      dockerfile: ./msvc-payments/Dockerfile
+    container_name: msvc-payments
+    env_file: .env
+    depends_on:
+      - postgres-payments
+      - eureka-server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${PAYMENTS_DB_HOST}:${PAYMENTS_DB_PORT}/${PAYMENTS_DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${PAYMENTS_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${PAYMENTS_DB_PASS}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${PAYMENTS_DB_DIALECT}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
+      - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN}
+    ports:
+      - "8005:8005"
+    networks:
+      - hotel-net
+
+  postgres-payments:
+    image: postgres:15
+    container_name: postgres-payments
+    restart: always
+    environment:
+      - POSTGRES_USER=${PAYMENTS_DB_USER}
+      - POSTGRES_PASSWORD=${PAYMENTS_DB_PASS}
+      - POSTGRES_DB=${PAYMENTS_DB_NAME}
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_payments_data:/var/lib/postgresql/data
+    networks:
+      - hotel-net
+
+
+  msvc-reviews:
+    build:
+      context: .
+      dockerfile: ./msvc-reviews/Dockerfile
+    container_name: msvc-reviews
+    env_file: .env
+    depends_on:
+      - mysql-reviews
+      - eureka-server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${REVIEWS_DB_HOST}:${REVIEWS_DB_PORT}/${REVIEWS_DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=${REVIEWS_DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${REVIEWS_DB_PASS}
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=${REVIEWS_DB_DIALECT}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_URL}
+    ports:
+      - "8006:8006"
+    networks:
+      - hotel-net
+
+  mysql-reviews:
+    image: mysql:8
+    container_name: mysql-reviews
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${REVIEWS_DB_PASS}
+      - MYSQL_DATABASE=${REVIEWS_DB_NAME}
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql_reviews_data:/var/lib/mysql
+    networks:
+      - hotel-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    networks:
+      - hotel-net
+
+
+networks:
+  hotel-net:
+
+volumes:
+  mysql_hotels_data:
+  mysql_users_data:
+  mysql_reviews_data:
+  postgres_rooms_data:
+  postgres_payments_data:
+  mongo_reservations_data:
+

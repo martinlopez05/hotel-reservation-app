@@ -1,4 +1,9 @@
+server:
+  port: ${GATEWAY_PORT:8090}
+
 spring:
+  application:
+    name: msvc-api-gateway
   main:
     web-application-type: reactive
 
@@ -9,42 +14,51 @@ spring:
           globalcors:
             cors-configurations:
               '[/**]':
-                allowed-origins:
-                  - "http://localhost:5173"
-                  - "https://c63060250848.ngrok-free.app"
+                allowed-origins: ${ALLOWED_ORIGINS:"http://localhost:5173"}
                 allowed-methods: "*"
                 allowed-headers: "*"
                 allow-credentials: true
 
-          routes:
-            - id: msvc-users
-              uri: lb://msvc-users
-              predicates:
-                - Path=/users/**
-            - id: auth
-              uri: lb://msvc-users
-              predicates:
-                - Path=/auth/**
-            - id: msvc-rooms
-              uri: lb://msvc-rooms
-              predicates:
-                - Path=/rooms/**
-            - id: msvc-hotels
-              uri: lb://msvc-hotels
-              predicates:
-                - Path=/hotels/**
-            - id: msvc-reservations
-              uri: lb://msvc-reservations
-              predicates:
-                - Path=/reservations/**
-            - id: msvc-payments
-              uri: lb://msvc-payments
-              predicates:
-                - Path=/payment/**
-            - id: msvc-reviews
-              uri: lb://msvc-reviews
-              predicates:
-                - Path=/review/**
+      routes:
+        - id: msvc-users
+          uri: lb://msvc-users
+          predicates:
+            - Path=/users/**
+        - id: auth
+          uri: lb://msvc-users
+          predicates:
+            - Path=/auth/**
+        - id: msvc-rooms
+          uri: lb://msvc-rooms
+          predicates:
+            - Path=/rooms/**
+        - id: msvc-hotels
+          uri: lb://msvc-hotels
+          predicates:
+            - Path=/hotels/**
+        - id: msvc-reservations
+          uri: lb://msvc-reservations
+          predicates:
+            - Path=/reservations/**
+        - id: msvc-payments
+          uri: lb://msvc-payments
+          predicates:
+            - Path=/payment/**
+        - id: msvc-reviews
+          uri: lb://msvc-reviews
+          predicates:
+            - Path=/review/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:AUTH-JWT}
+    user:
+      generator: ${JWT_GENERATOR:clave-jwt}
 
 
 
