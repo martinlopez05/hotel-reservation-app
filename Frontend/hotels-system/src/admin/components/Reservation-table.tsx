@@ -32,6 +32,7 @@ export function ReservationsTable() {
             const response = await fetch(`${BASE_URL}`, {
                 headers: {
                     Authorization: `Bearer ${user?.token}`,
+                    "ngrok-skip-browser-warning": "true"
                 },
             })
             if (response.ok) {

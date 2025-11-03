@@ -1,5 +1,3 @@
-
-
 spring:
   main:
     web-application-type: reactive
@@ -13,38 +11,38 @@ spring:
               '[/**]':
                 allowed-origins:
                   - "http://localhost:5173"
-                  - "https://546e1a71878a.ngrok-free.app"
+                  - "https://c63060250848.ngrok-free.app"
                 allowed-methods: "*"
                 allowed-headers: "*"
                 allow-credentials: true
 
           routes:
             - id: msvc-users
-              uri: http://localhost:8004
+              uri: lb://msvc-users
               predicates:
                 - Path=/users/**
             - id: auth
-              uri: http://localhost:8004
+              uri: lb://msvc-users
               predicates:
                 - Path=/auth/**
             - id: msvc-rooms
-              uri: http://localhost:8001
+              uri: lb://msvc-rooms
               predicates:
                 - Path=/rooms/**
             - id: msvc-hotels
-              uri: http://localhost:8002
+              uri: lb://msvc-hotels
               predicates:
                 - Path=/hotels/**
             - id: msvc-reservations
-              uri: http://localhost:8003
+              uri: lb://msvc-reservations
               predicates:
                 - Path=/reservations/**
             - id: msvc-payments
-              uri: http://localhost:8005
+              uri: lb://msvc-payments
               predicates:
                 - Path=/payment/**
             - id: msvc-reviews
-              uri: http://localhost:8006
+              uri: lb://msvc-reviews
               predicates:
                 - Path=/review/**
 

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "msvc-hotels", url = "localhost:8002")
+@FeignClient(name = "msvc-hotels")
 public interface HotelClientRest {
 
     @GetMapping("/hotels/{id}")

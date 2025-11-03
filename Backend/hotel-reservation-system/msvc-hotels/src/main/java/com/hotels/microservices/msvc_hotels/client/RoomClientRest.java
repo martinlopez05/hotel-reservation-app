@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "msvc-rooms", url = "localhost:8001")
+@FeignClient(name = "msvc-rooms")
 public interface RoomClientRest {
 
     @GetMapping("/rooms/hotel/{hotelId}")

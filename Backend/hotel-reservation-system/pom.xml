@@ -23,6 +23,7 @@
     <module>msvc-api-gateway</module>
     <module>msvc-payments</module>
     <module>msvc-reviews</module>
+    <module>eureka-server</module>
   </modules>
   <dependencies>
     <dependency>

@@ -87,6 +87,7 @@ export function RoomDialog({ open, onOpenChange, room, onSuccess }: RoomDialogPr
             const response = await hotelApi.get('', {
                 headers: {
                     Authorization: `Bearer ${user?.token}`,
+                    "ngrok-skip-browser-warning": "true"
                 },
             })
             const { data } = await response
@@ -110,6 +111,7 @@ export function RoomDialog({ open, onOpenChange, room, onSuccess }: RoomDialogPr
                 headers: {
                     "Authorization": `Bearer ${user ? user.token : 0}`,
                     "Content-Type": "application/json",
+                    "ngrok-skip-browser-warning": "true"
                 },
                 body: JSON.stringify(formData),
             })

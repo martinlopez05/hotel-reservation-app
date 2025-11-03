@@ -6,6 +6,7 @@ export const getRoomsByHotel = async (idHotel: number, token: string): Promise<R
   const { data } = await roomApi.get(`/hotel/${idHotel}`, {
     headers: {
       Authorization: `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "true"
     },
   });
   return data;

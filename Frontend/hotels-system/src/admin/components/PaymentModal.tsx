@@ -44,6 +44,7 @@ export function PaymentModal({ isOpen, onClose, reservationId, orderReservation,
                 headers: {
                     'Authorization': `Bearer ${user?.token}`,
                     'Content-Type': 'application/json',
+                    "ngrok-skip-browser-warning": "true"
 
                 },
                 body: JSON.stringify(paymentRequest)

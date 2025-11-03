@@ -1,20 +1,19 @@
 import type { User } from "@/Hotels/data/user.interface";
-import { createContext, useEffect, useState, type PropsWithChildren } from "react";
-
-
-
-
+import { jwtDecode } from "jwt-decode";
+import { useEffect, useState, createContext, type PropsWithChildren } from "react";
 
 type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
 
-interface UserContextProps {
-    authStatus: AuthStatus;
-    isauthenticated: boolean;
-    user: User | null;
-    login: (user: User) => boolean;
-    logout: () => void;
+interface JwtPayload {
+    exp: number;
 }
 
+interface UserContextProps {
+    authStatus: AuthStatus;
+    user: User | null;
+    login: (user: User) => void;
+    logout: () => void;
+}
 
 export const UserContext = createContext({} as UserContextProps);
 
@@ -23,39 +22,69 @@ export const UserContextProvider = ({ children }: PropsWithChildren) => {
     const [authStatus, setAuthStatus] = useState<AuthStatus>('checking');
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
+        const storedUser = localStorage.getItem("user");
         if (storedUser) {
             const parsed = JSON.parse(storedUser);
-            setUser(parsed);
-            setAuthStatus('authenticated');
+            const token = parsed?.token;
+
+            if (token && isTokenValid(token)) {
+                setUser(parsed);
+                setAuthStatus("authenticated");
+            } else {
+                handleLogout();
+            }
         } else {
-            setAuthStatus('not-authenticated');
+            setAuthStatus("not-authenticated");
         }
     }, []);
 
+    const isTokenValid = (token: string) => {
+        try {
+            const decoded: JwtPayload = jwtDecode(token);
+            const now = Date.now() / 1000;
+            return decoded.exp > now;
+        } catch {
+            return false;
+        }
+    };
+
     const handleLogin = (user: User) => {
-        const userWithRole = { ...user, role: user.role || 'ROLE_USER' };
-        setUser(userWithRole);
-        setAuthStatus('authenticated');
-        localStorage.setItem('user', JSON.stringify(userWithRole));
-        return true;
+        setUser(user);
+        setAuthStatus("authenticated");
+        localStorage.setItem("user", JSON.stringify(user));
     };
 
     const handleLogout = () => {
         setUser(null);
-        setAuthStatus('not-authenticated');
-        localStorage.removeItem('user');
+        setAuthStatus("not-authenticated");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
     };
 
-    if (authStatus === 'checking') {
-        return <div>Cargando sesión...</div>;
+    useEffect(() => {
+        if (authStatus === "authenticated" && user?.token) {
+            const interval = setInterval(() => {
+                if (!isTokenValid(user.token)) {
+                    console.warn("Token expirado, redirigiendo al login...");
+                    handleLogout();
+                }
+            }, 60 * 1000);
+            return () => clearInterval(interval);
+        }
+    }, [authStatus, user]);
+
+    if (authStatus === "checking") {
+        return (
+            <div className="flex items-center justify-center h-screen text-lg text-gray-600">
+                Verificando sesión...
+            </div>
+        );
     }
 
     return (
         <UserContext.Provider
             value={{
                 authStatus,
-                isauthenticated: authStatus === 'authenticated',
                 user,
                 login: handleLogin,
                 logout: handleLogout,
@@ -65,4 +94,3 @@ export const UserContextProvider = ({ children }: PropsWithChildren) => {
         </UserContext.Provider>
     );
 };
-

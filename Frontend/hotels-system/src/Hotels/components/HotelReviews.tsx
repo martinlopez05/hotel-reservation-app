@@ -68,7 +68,8 @@ export function HotelReviews({ hotelId }: HotelReviewsProps) {
             await fetch(`${BASE_URL}/${reviewId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${user.token}`
+                    'Authorization': `Bearer ${user.token}`,
+                    "ngrok-skip-browser-warning": "true"
                 }
             })
             setReviews((prevReviews) => prevReviews.filter(r => r.id !== reviewId));
@@ -91,6 +92,7 @@ export function HotelReviews({ hotelId }: HotelReviewsProps) {
                 headers: {
                     'Authorization': `Bearer ${user?.token}`,
                     "Content-Type": "application/json",
+                    "ngrok-skip-browser-warning": "true"
                 },
                 body: JSON.stringify(review),
             });
@@ -113,7 +115,8 @@ export function HotelReviews({ hotelId }: HotelReviewsProps) {
         try {
             const response = await fetch(`${BASE_URL}/${hotelId}`, {
                 headers: {
-                    'Authorization': `Bearer ${user?.token}`
+                    'Authorization': `Bearer ${user?.token}`,
+                    "ngrok-skip-browser-warning": "true"
                 }
             })
             if (response.ok) {

@@ -30,6 +30,7 @@ export function RoomsTable() {
             const response = await roomApi.get('', {
                 headers: {
                     Authorization: `Bearer ${user?.token}`,
+                    "ngrok-skip-browser-warning": "true"
                 }
             })
             if (response) {
@@ -66,9 +67,11 @@ export function RoomsTable() {
             await roomApi.delete(`/${roomToDelete}`, {
                 headers: {
                     Authorization: `Bearer ${user?.token}`,
+                    "ngrok-skip-browser-warning": "true"
                 }
             })
-            toast.error('Habitacion eliminada correctamente')
+            toast.success('Habitacion eliminada correctamente')
+            setRooms(prevRooms => prevRooms.filter(room => room.id !== roomToDelete));
         } catch (error) {
             toast.error('Error al eliminar habitación')
         }

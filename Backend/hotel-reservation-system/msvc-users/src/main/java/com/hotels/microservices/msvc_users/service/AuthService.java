@@ -1,9 +1,7 @@
 package com.hotels.microservices.msvc_users.service;
 
-import com.hotels.microservices.msvc_users.dto.AuthRequestDTO;
-import com.hotels.microservices.msvc_users.dto.AuthResponseDTO;
-import com.hotels.microservices.msvc_users.dto.RegisterRequestDTO;
-import com.hotels.microservices.msvc_users.dto.RegisterResponseDTO;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.hotels.microservices.msvc_users.dto.*;
 import com.hotels.microservices.msvc_users.enums.EnumRoles;
 import com.hotels.microservices.msvc_users.model.RoleEntity;
 import com.hotels.microservices.msvc_users.model.User;
@@ -11,6 +9,7 @@ import com.hotels.microservices.msvc_users.repository.IRepositoryRoleEntity;
 import com.hotels.microservices.msvc_users.repository.IRepositoryUser;
 import com.hotels.microservices.msvc_users.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,18 +37,19 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public AuthResponseDTO login(AuthRequestDTO authRequestDTO){
+    public AuthResponseDTO login(AuthRequestDTO authRequestDTO) {
         UserDetails userDetails = userDetailService.loadUserByUsername(authRequestDTO.getUsername());
 
-        if(!passwordEncoder.matches(authRequestDTO.getPassword(), userDetails.getPassword())){
+        if (!passwordEncoder.matches(authRequestDTO.getPassword(), userDetails.getPassword())) {
             throw new RuntimeException("Incorrect password");
         }
 
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
-        String token = jwtUtil.generateToken(userDetails.getUsername(),role);
+        String token = jwtUtil.generateToken(userDetails.getUsername(), role);
 
-        User user = repositoryUser.findByUsername(userDetails.getUsername()).orElseThrow( () -> new RuntimeException("User not found"));
+        User user = repositoryUser.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         return AuthResponseDTO.builder()
                 .id(user.getId())
@@ -58,10 +58,9 @@ public class AuthService {
                 .email(user.getEmail())
                 .token(token)
                 .build();
-
     }
 
-    public RegisterResponseDTO register(RegisterRequestDTO registerRequestDTO){
+    public RegisterResponseDTO register(RegisterRequestDTO registerRequestDTO) {
         String username = registerRequestDTO.getUsername();
         String password = registerRequestDTO.getPassword();
         String email = registerRequestDTO.getEmail();
@@ -95,5 +94,4 @@ public class AuthService {
 
 
     }
-
 }

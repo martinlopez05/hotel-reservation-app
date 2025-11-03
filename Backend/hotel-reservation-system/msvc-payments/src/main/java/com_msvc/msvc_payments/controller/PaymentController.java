@@ -66,12 +66,12 @@ public class PaymentController {
             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                     .items(List.of(item))
                     .externalReference(request.getUserId() + ":" + request.getReservationId())
-                    .notificationUrl("https://0ac3175ceb7f.ngrok-free.app/payment/webhook") // url con ngrok
+                    .notificationUrl("https://pseudoskeletal-edwina-deplorably.ngrok-free.dev/payment/webhook") // url con ngrok
                     .backUrls(
                             PreferenceBackUrlsRequest.builder()
-                                    .success("https://546e1a71878a.ngrok-free.app") //url publicas
-                                    .failure("https://546e1a71878a.ngrok-free.app")
-                                    .pending("https://546e1a71878a.ngrok-free.app")
+                                    .success("https://c63060250848.ngrok-free.app") //url publicas
+                                    .failure("https://c63060250848.ngrok-free.app")
+                                    .pending("https://c63060250848.ngrok-free.app")
                                     .build()
                     )
                     .autoReturn("approved")

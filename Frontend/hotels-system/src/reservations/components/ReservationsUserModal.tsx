@@ -74,6 +74,7 @@ export function MyReservationsModal({ isOpen, onClose, reservations }: MyReserva
         headers: {
           'Authorization': `Bearer ${user?.token}`,
           'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": "true"
 
         },
         body: JSON.stringify(payment)

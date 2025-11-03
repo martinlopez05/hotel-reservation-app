@@ -34,6 +34,8 @@ export function HotelsTable() {
                 headers: {
                     "Authorization": `Bearer ${user ? user.token : 0}`,
                     "Content-Type": "application/json",
+                    "ngrok-skip-browser-warning": "true"
+
                 }
             })
             if (response.ok) {
@@ -71,6 +73,7 @@ export function HotelsTable() {
                 headers: {
                     "Authorization": `Bearer ${user ? user.token : 0}`,
                     "Content-Type": "application/json",
+                    "ngrok-skip-browser-warning": "true"
                 },
             })
 
