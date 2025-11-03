@@ -21,6 +21,8 @@ public interface IRepositoryReservation extends MongoRepository<Reservation,Stri
 
     void deleteAllByHotelId(Long hotelId);
 
+    void deleteAllByRoomId(Long roomId);
+    
     List<Reservation> findByUserId(Long userId);
 
 }

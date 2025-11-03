@@ -1,10 +1,12 @@
 package com.hotels.microservices.msvc_rooms.controller;
 
+import com.hotels.microservices.msvc_rooms.config.RabbitRoomConfig;
 import com.hotels.microservices.msvc_rooms.dto.RoomDTO;
 import com.hotels.microservices.msvc_rooms.dto.RoomUpdateDTO;
 import com.hotels.microservices.msvc_rooms.model.Room;
 import com.hotels.microservices.msvc_rooms.service.IServiceRoom;
 import jakarta.validation.Valid;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -20,6 +22,9 @@ public class RoomController {
 
     @Autowired
     IServiceRoom serviceRoom;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     @GetMapping
     public ResponseEntity<List<RoomDTO>> getAllRooms(){
@@ -45,6 +50,11 @@ public class RoomController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRoom(@PathVariable Long id){
         serviceRoom.deleteRoom(id);
+        rabbitTemplate.convertAndSend(
+                RabbitRoomConfig.EXCHANGE,
+                RabbitRoomConfig.ROUTING_KEY,
+                id
+        );
         return ResponseEntity.noContent().build();
     }
 
