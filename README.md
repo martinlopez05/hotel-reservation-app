@@ -61,7 +61,8 @@ permitiendo llamadas HTTP directas entre servicios de manera declarativa.
 public interface RoomClient {
     @GetMapping("/rooms/{id}")
     RoomDTO findRoomById(@PathVariable Long id);
-}```
+}
+```
 
 **Ventajas:**
 - ✅ Interfaz declarativa y fácil de implementar  
@@ -85,6 +86,7 @@ Cuando se elimina una habitación, `RoomService` emite un evento a RabbitMQ y
 public void handleRoomDeleted(Long roomId) {
     repositoryReservation.deleteAllByRoomId(roomId);
 }
+```
 
 **Beneficios de este enfoque:**
 - 🚀 **Desacoplamiento:** Los servicios no dependen directamente entre sí  
@@ -107,6 +109,7 @@ public void handleRoomDeleted(Long roomId) {
 | 💳 **Payment Service** | Procesamiento y gestión de pagos de reservas | PostgreSQL |
 | 📝 **Review Service** | Opiniones y calificaciones de usuarios | MongoDB |
 
+---
 
 ## 🔐 Seguridad
 
@@ -162,20 +165,15 @@ El sistema utiliza **Spring Security + JWT (JSON Web Tokens)** para la autentica
 ```bash
 git clone https://github.com/martinlopez05/hotel-reservation-system.git
 cd hotel-reservation-system
-
----
+```
 
 #### 2️⃣ Iniciar RabbitMQ y las bases de datos necesarias  
 *(MySQL, PostgreSQL, MongoDB)*
 
----
-
 #### 3️⃣ Levantar Eureka Server
 ```bash
 mvn spring-boot:run -pl eureka-server
-
-
----
+```
 
 #### 4️⃣ Levantar los microservicios
 ```bash
@@ -185,17 +183,15 @@ mvn spring-boot:run -pl msvc-reservations
 mvn spring-boot:run -pl msvc-users
 mvn spring-boot:run -pl msvc-payments
 mvn spring-boot:run -pl msvc-reviews
+```
 
+#### 5️⃣ Acceder al dashboard de Eureka  
+👉 [http://localhost:8761](http://localhost:8761)
 
-#### 5️⃣ Acceder al dashboard de Eureka
+#### 6️⃣ Acceder al sistema a través del Gateway  
+👉 [http://localhost:8090](http://localhost:8090)
 
-👉 http://localhost:8761
-
-
-#### 6️⃣ Acceder al sistema a través del Gateway
-
-👉 http://localhost:8090
-
+---
 
 ## 🐳 Próximamente
 
@@ -214,3 +210,4 @@ En la siguiente fase se incluirá un `docker-compose.yml` con:
 🎓 *Estudiante de Licenciatura en Sistemas de Información – Universidad Nacional de Luján*  
 
 💻 [**GitHub**](https://github.com/martinlopez05) | [**LinkedIn**](https://www.linkedin.com/in/martin-lopez-8264132a8/)
+
