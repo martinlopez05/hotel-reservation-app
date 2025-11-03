@@ -93,3 +93,13 @@ public interface RoomClient {
     RoomDTO findRoomById(@PathVariable Long id);
 }
 
+### 🐇 Comunicación asíncrona (RabbitMQ)
+
+Cuando se elimina una habitación, `RoomService` emite un evento a RabbitMQ.  
+`ReservationService` escucha el evento y elimina las reservas asociadas automáticamente:
+
+```java
+@RabbitListener(queues = RabbitRoomConfig.QUEUE)
+public void handleRoomDeleted(Long roomId) {
+    repositoryReservation.deleteAllByRoomId(roomId);
+}
