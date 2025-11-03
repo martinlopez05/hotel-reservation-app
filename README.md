@@ -78,12 +78,13 @@ El sistema utiliza **Spring Security + JWT (JSON Web Tokens)** para la autentica
 - ✅ Los microservicios internos confían en el token propagado por el Gateway
 
 ---
-
 ## 📬 Comunicación entre microservicios
 
 ### 🔁 Comunicación síncrona (OpenFeign)
+
 Ejemplo:  
 `ReservationService` obtiene datos del `RoomService` a través de un cliente Feign:
+
 ```java
 @FeignClient(name = "msvc-rooms")
 public interface RoomClient {
@@ -92,15 +93,13 @@ public interface RoomClient {
 }
 🐇 Comunicación asíncrona (RabbitMQ)
 Cuando se elimina una habitación, RoomService emite un evento a RabbitMQ.
+ReservationService escucha el evento y elimina las reservas asociadas automáticamente:
 
-ReservationService escucha el evento y elimina las reservas asociadas automáticamente.
-
-java
-Copiar código
 @RabbitListener(queues = RabbitRoomConfig.QUEUE)
 public void handleRoomDeleted(Long roomId) {
     repositoryReservation.deleteAllByRoomId(roomId);
 }
+
 💻 Funcionalidades principales
 ✅ Gestión de hoteles y habitaciones
 ✅ Creación y cancelación de reservas
@@ -127,20 +126,18 @@ public void handleRoomDeleted(Long roomId) {
  Despliegue en VPS / Kubernetes
 
 🧩 Cómo ejecutar el proyecto (local)
-Clonar el repositorio
-
+1️⃣ Clonar el repositorio
 bash
 Copiar código
-git clone https://github.com/tuusuario/hotel-reservation-system.git
-Iniciar RabbitMQ y las bases de datos necesarias (MySQL, PostgreSQL, MongoDB)
+git clone https://github.com/martinlopez05/hotel-reservation-system.git
+2️⃣ Iniciar RabbitMQ y las bases de datos necesarias
+(MySQL, PostgreSQL, MongoDB)
 
-Levantar Eureka Server
-
+3️⃣ Levantar Eureka Server
 bash
 Copiar código
 mvn spring-boot:run -pl eureka-server
-Levantar los microservicios
-
+4️⃣ Levantar los microservicios
 bash
 Copiar código
 mvn spring-boot:run -pl msvc-hotels
@@ -149,10 +146,10 @@ mvn spring-boot:run -pl msvc-reservations
 mvn spring-boot:run -pl msvc-users
 mvn spring-boot:run -pl msvc-payments
 mvn spring-boot:run -pl msvc-reviews
-Acceder al dashboard de Eureka
+5️⃣ Acceder al dashboard de Eureka
 👉 http://localhost:8761
 
-Acceder al sistema a través del Gateway
+6️⃣ Acceder al sistema a través del Gateway
 👉 http://localhost:8090
 
 🐳 Próximamente
@@ -165,8 +162,3 @@ RabbitMQ y bases de datos
 Eureka y API Gateway
 
 Frontend React como contenedor independiente
-
-📎 Autor
-👤 Martín López
-🎓 Estudiante de Licenciatura en Sistemas de Información – Universidad Nacional de Luján
-
