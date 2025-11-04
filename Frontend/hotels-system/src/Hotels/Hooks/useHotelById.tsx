@@ -9,7 +9,7 @@ const useHotelById = (id: number) => {
 
     return useQuery({
         queryKey: ['hotel', id],
-        queryFn: () => getHotelById(id, user.token),
+        queryFn: () => getHotelById(id, user ? user.token : ''),
         staleTime: 1000 * 60 * 5, // 5 minutos
     });
 }

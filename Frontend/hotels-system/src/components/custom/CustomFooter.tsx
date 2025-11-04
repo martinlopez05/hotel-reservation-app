@@ -1,4 +1,4 @@
-import { Mail, Github, Linkedin, Twitter } from "lucide-react"
+import { Mail, Github, Linkedin } from "lucide-react"
 
 export const CustomFooter = () => {
     const currentYear = new Date().getFullYear()

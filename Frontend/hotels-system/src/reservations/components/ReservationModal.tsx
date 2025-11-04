@@ -1,4 +1,4 @@
-import { useState, useMemo, use, useContext } from "react"
+import { useState, useMemo, useContext } from "react"
 import {
     Dialog,
     DialogContent,
@@ -13,7 +13,7 @@ import { Calendar } from "lucide-react"
 import type { ReservationData } from "../data/reservationData"
 import { useCreateReservation } from "../hooks/useCreateReservation"
 import { UserContext } from "@/context/UserContext"
-import { Navigate, useNavigate } from "react-router"
+import { Navigate } from "react-router"
 
 interface ReservationModalProps {
     isOpen: boolean

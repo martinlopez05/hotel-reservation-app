@@ -119,7 +119,7 @@ export default function HotelPage() {
                     <h2 className="text-3xl font-bold text-foreground mb-6">Habitaciones disponibles</h2>
 
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {rooms.map((room) => (
+                        {rooms?.map((room) => (
                             <Card key={room.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                                 {/* Imagen como header visual */}
                                 <img

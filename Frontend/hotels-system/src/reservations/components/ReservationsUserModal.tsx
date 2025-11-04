@@ -24,7 +24,7 @@ export function MyReservationsModal({ isOpen, onClose, reservations }: MyReserva
   const [selectedReservation, setSelectedReservation] = useState<ReservationResponse | null>(null)
 
   const { user, authStatus } = use(UserContext)
-  const { mutate: deleteReservation } = useDeleteReservation(user.token)
+  const { mutate: deleteReservation } = useDeleteReservation(user ? user.token : '')
 
   if (authStatus === "checking") {
     return <div>Cargando sesión...</div>;
@@ -61,7 +61,7 @@ export function MyReservationsModal({ isOpen, onClose, reservations }: MyReserva
 
   const handleBuyPayment = async (reservation: ReservationResponse) => {
     const payment = {
-      userId: user.id,
+      userId: user ? user.id : '',
       reservationId: reservation.id,
       amount: reservation.price
     };

@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { MapPin, Star } from 'lucide-react'
-import React from 'react'
 import { Link } from 'react-router'
 import type { Hotel } from '../data/hotel.interface'
 

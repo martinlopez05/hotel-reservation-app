@@ -10,7 +10,7 @@ const useGetReservationsByUser = (idUser: number) => {
     return useQuery(
         {
             queryKey: ['reservations', idUser],
-            queryFn: () => getReservationsByUser(idUser, user.token),
+            queryFn: () => getReservationsByUser(idUser, user ? user.token : ''),
             staleTime: 1000 * 60 * 5,
         }
     )

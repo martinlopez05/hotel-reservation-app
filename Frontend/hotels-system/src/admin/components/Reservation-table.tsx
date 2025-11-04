@@ -15,7 +15,7 @@ export function ReservationsTable() {
     const [reservations, setReservations] = useState<ReservationResponse[]>([])
     const [loading, setLoading] = useState(true)
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    const [selectedReservation, setSelectedReservation] = useState<ReservationResponse>(null);
+    const [selectedReservation, setSelectedReservation] = useState<ReservationResponse | null>(null);
 
 
     const BASE_URL = import.meta.env.VITE_API_URL_RESERVATION;

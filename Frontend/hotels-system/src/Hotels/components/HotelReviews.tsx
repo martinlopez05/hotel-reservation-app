@@ -11,6 +11,7 @@ import type { ReviewResponse } from "../data/review.response"
 import { UserContext } from "@/context/UserContext"
 import type { ReviewRequest } from "../data/review.request"
 import { toast } from "react-toastify"
+import { useNavigate } from "react-router"
 
 
 
@@ -30,6 +31,7 @@ export function HotelReviews({ hotelId }: HotelReviewsProps) {
 
     const { user } = use(UserContext);
 
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchGetReviews()
@@ -43,6 +45,8 @@ export function HotelReviews({ hotelId }: HotelReviewsProps) {
             toast.error("Por favor, selecciona una calificación y escribe un comentario");
             return;
         }
+
+        if (!user?.id) return navigate('/login');
 
         const newReview: ReviewRequest = {
             hotelId,
@@ -68,7 +72,7 @@ export function HotelReviews({ hotelId }: HotelReviewsProps) {
             await fetch(`${BASE_URL}/${reviewId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${user.token}`,
+                    'Authorization': `Bearer ${user ? user.token : ''}`,
                     "ngrok-skip-browser-warning": "true"
                 }
             })
@@ -209,7 +213,7 @@ export function HotelReviews({ hotelId }: HotelReviewsProps) {
                                         </p>
                                     </div>
                                     {renderStars(review.rating)}
-                                    {user.username === review.username && (
+                                    {user ? user.username : '' === review.username && (
                                         <Button
                                             variant="ghost"
                                             size="icon"

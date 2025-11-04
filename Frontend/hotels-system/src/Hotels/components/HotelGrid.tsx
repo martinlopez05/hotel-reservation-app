@@ -1,4 +1,4 @@
-import React from 'react'
+
 import HotelCard from './HotelCard'
 import type { Hotel } from '../data/hotel.interface'
 

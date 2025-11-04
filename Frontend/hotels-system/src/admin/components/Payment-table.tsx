@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { CreditCard, DollarSign, Calendar } from "lucide-react"
 import { use, useEffect, useState } from "react"
-import type { PaymentMethod, StatusPayment } from "@/reservations/data/payment.response"
+import type { PaymentMethod, StatusPayment, PaymentResponse } from "@/reservations/data/payment.response"
 import { UserContext } from "@/context/UserContext"
 
 
@@ -39,7 +39,7 @@ export function PaymentsTable() {
             setLoading(true);
             const response = await fetch(`${BASE_URL}`, {
                 headers: {
-                    'Authorization': `Bearer ${user.token}`,
+                    'Authorization': `Bearer ${user ? user.token : 0}`,
                     "ngrok-skip-browser-warning": "true"
                 }
             })
