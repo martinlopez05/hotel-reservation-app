@@ -213,7 +213,7 @@ export function HotelReviews({ hotelId }: HotelReviewsProps) {
                                         </p>
                                     </div>
                                     {renderStars(review.rating)}
-                                    {user ? user.username : '' === review.username && (
+                                    {user && user.username === review.username && (
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -223,6 +223,7 @@ export function HotelReviews({ hotelId }: HotelReviewsProps) {
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
                                     )}
+
                                 </div>
                                 <p className="text-foreground leading-relaxed">{review.commentary}</p>
                             </CardContent>

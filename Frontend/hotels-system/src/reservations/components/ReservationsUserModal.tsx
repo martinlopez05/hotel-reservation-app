@@ -217,7 +217,7 @@ export function MyReservationsModal({ isOpen, onClose, reservations }: MyReserva
                             onClick={() => handleBuyPayment(reservation)}
                           >
                             <img
-                              src="/public/mercadopago-logo-png_seeklogo-199533.png"
+                              src="/mercadopago-logo-png_seeklogo-199533.png"
                               alt="Mercado Pago"
                               className="w-12 h-12 mr-2"
                             />

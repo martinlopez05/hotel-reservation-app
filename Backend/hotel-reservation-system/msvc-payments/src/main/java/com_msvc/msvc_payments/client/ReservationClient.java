@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "msvc-reservations")
 public interface ReservationClient {
 
-    @GetMapping("/{id}")
+    @GetMapping("/reservations/{id}")
     ResponseEntity<ReservationResponseDTO> getReservation(@PathVariable String id);
 
 
-    @PutMapping("/{id}/state")
+    @PutMapping("/reservations/{id}/state")
     ReservationResponseDTO updateState(@PathVariable("id") String id,
                                        @RequestParam("state") String state);
 }
