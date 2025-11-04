@@ -11,5 +11,4 @@ target/
 *.log
 **/.env
 
-# Archivos de configuración locales
-**/application.properties
+

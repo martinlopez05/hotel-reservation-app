@@ -56,9 +56,9 @@ eureka:
 
 security:
   jwt:
-    secret: ${JWT_SECRET:AUTH-JWT}
+    secret: ${JWT_SECRET}
     user:
-      generator: ${JWT_GENERATOR:clave-jwt}
+      generator: ${JWT_GENERATOR}
 
 
 
