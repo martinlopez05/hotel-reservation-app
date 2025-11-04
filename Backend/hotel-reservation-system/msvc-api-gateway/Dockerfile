@@ -14,7 +14,7 @@ COPY ./msvc-api-gateway/src ./src
 
 RUN ./mvnw clean package -DskipTests
 
-FROM openjdk:17-jdk-alpine
+FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
