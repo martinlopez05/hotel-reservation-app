@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-alpine AS builder
+FROM eclipse-temurin:17-jdk-alpine AS builder
 
 WORKDIR /app/eureka-server
 
