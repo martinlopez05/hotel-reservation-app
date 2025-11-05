@@ -3,7 +3,9 @@
 Aplicación web completa para la **gestión de reservas de hoteles**, desarrollada con **arquitectura de microservicios**.  
 El sistema permite administrar hoteles, habitaciones, usuarios, reservas y pagos, con roles (**admin / usuario**), autenticación **JWT** y comunicación entre servicios tanto **síncrona (REST/Feign)** como **asíncrona (RabbitMQ)**.
 
-🌐 [Visita la aplicación aquí](https://hotelfly.netlify.app/)
+La aplicación está desplegada y disponible en el siguiente enlace:  
+
+👉 [https://hotelfly.netlify.app/](https://hotelfly.netlify.app/)  🌐
 
 ---
 
