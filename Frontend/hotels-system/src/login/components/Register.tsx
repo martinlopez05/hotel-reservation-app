@@ -1,15 +1,13 @@
-"use client"
-
 import type React from "react"
-
-import { useState } from "react"
+import { use, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { toast } from "react-toastify"
+import { UserContext } from "@/context/UserContext"
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -24,6 +22,8 @@ export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const { login } = use(UserContext);
+    const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -87,7 +87,21 @@ export default function RegisterPage() {
                     toast.error('Error al registrar el usuario, vuelva a intentarlo')
                 }
 
-                toast.success('Usuario registrado correctamente')
+                const loginResponse = await fetch(`${BASE_URL}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: formData.username,
+                        password: formData.password,
+                    }),
+                });
+
+                if (loginResponse.ok) {
+                    const loginData = await loginResponse.json();
+                    login(loginData);
+                    navigate("/");
+                    toast.success('Usuario registrado correctamente')
+                }
 
                 setFormData({
                     username: '',

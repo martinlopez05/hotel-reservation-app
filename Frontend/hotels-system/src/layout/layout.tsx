@@ -19,10 +19,10 @@ export const Layout = () => {
 
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="flex flex-col min-h-screen bg-background">
             <CustomHeader onReservationsClick={() => setIsReservationsModalOpen(true)}></CustomHeader>
             <ScrollToTop></ScrollToTop>
-            <main className="p-0">
+            <main className="flex-1 p-0">
                 <Outlet />
             </main>
             <CustomFooter></CustomFooter>
