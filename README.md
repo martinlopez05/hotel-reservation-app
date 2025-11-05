@@ -1,4 +1,4 @@
-# 🏨 Hotel Reservation System (En desarrollo)
+# 🏨 Hotel Reservation System 
 
 Aplicación web completa para la **gestión de reservas de hoteles**, desarrollada con **arquitectura de microservicios**.  
 El sistema permite administrar hoteles, habitaciones, usuarios, reservas y pagos, con roles (**admin / usuario**), autenticación **JWT** y comunicación entre servicios tanto **síncrona (REST/Feign)** como **asíncrona (RabbitMQ)**.
