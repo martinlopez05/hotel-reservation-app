@@ -3,8 +3,7 @@
 Aplicación web completa para la **gestión de reservas de hoteles**, desarrollada con **arquitectura de microservicios**.  
 El sistema permite administrar hoteles, habitaciones, usuarios, reservas y pagos, con roles (**admin / usuario**), autenticación **JWT** y comunicación entre servicios tanto **síncrona (REST/Feign)** como **asíncrona (RabbitMQ)**.
 
-> ⚠️ Este proyecto se encuentra **en desarrollo activo**.  
-> Actualmente estoy trabajando en la **dockerización completa** y en la **integración final del frontend** con todos los microservicios.
+🌐 [Visita la aplicación aquí](https://hotelfly.netlify.app/)
 
 ---
 
@@ -193,14 +192,65 @@ mvn spring-boot:run -pl msvc-reviews
 
 ---
 
-## 🐳 Próximamente
+## 🐳 Dockerización y Despliegue
 
-En la siguiente fase se incluirá un `docker-compose.yml` con:
+Todo el **backend** fue **dockerizado** para garantizar un entorno reproducible.  
+Se utiliza **Docker Compose** para orquestar los servicios principales:
 
-- 🧩 **Todos los microservicios**  
-- 🐇 **RabbitMQ** y bases de datos  
-- 🌐 **Eureka Server** y **API Gateway**  
-- ⚛️ **Frontend React** como contenedor independiente  
+- 🧩 **Microservicios (Spring Boot)**
+- 🐇 **RabbitMQ**
+- 🗄️ **Bases de datos** (MySQL, PostgreSQL, MongoDB)
+- 🌐 **Eureka Server y API Gateway**
+
+```bash
+docker-compose up -d --build
+```
+Esto levanta todo el ecosistema y gestiona las dependencias entre contenedores.
+
+---
+
+## 🌍 Despliegue del Frontend
+
+El **Frontend (React)** fue desplegado en **Netlify**, comunicándose con el **API Gateway** mediante **HTTPS + JWT**.
+
+---
+
+## 🧭 Infraestructura en el VPS
+
+El backend está desplegado en un **VPS** utilizando **Docker Compose** junto con **Nginx** como *reverse proxy*:
+
+- 🔒 **Certificado SSL (HTTPS)**
+- 🔁 **Redirección hacia el API Gateway**
+- 🛡️ **Seguridad y rendimiento optimizado**
+
+---
+
+## 🚀 Resultado Final
+
+- ✅ **Backend** desplegado en **VPS** con **Docker Compose**
+- ✅ **Frontend público** en **Netlify**
+- ✅ **Comunicación segura** mediante **HTTPS + JWT**
+- ✅ **Integración completa** entre **RabbitMQ** y **FeignClient**
+- ✅ **Balanceo y seguridad** gestionados con **Nginx**
+
+---
+## 🧱 Arquitectura General
+
+<p align="center">
+  <img src="./Arquitectura%20de%20la%20Aplicación.jpg" alt="Arquitectura del Sistema" width="800">
+</p>
+
+> Diagrama general del sistema, mostrando la comunicación entre los microservicios, el API Gateway, las bases de datos y RabbitMQ.
+
+---
+
+## 👤 Autor
+
+**Martín López**  
+🎓 *Estudiante de Licenciatura en Sistemas de Información – Universidad Nacional de Luján*  
+
+- 💻 [GitHub](https://github.com/martinlopez05)  
+- 💼 [LinkedIn](https://www.linkedin.com/in/martin-lopez-8264132a8/)
 
 ---
 
