@@ -254,12 +254,5 @@ El backend está desplegado en un **VPS** utilizando **Docker Compose** junto co
 - 💻 [GitHub](https://github.com/martinlopez05)  
 - 💼 [LinkedIn](https://www.linkedin.com/in/martin-lopez-8264132a8/)
 
----
 
-## 📎 Autor
-
-**👤 Martín López**  
-🎓 *Estudiante de Licenciatura en Sistemas de Información – Universidad Nacional de Luján*  
-
-💻 [**GitHub**](https://github.com/martinlopez05) | [**LinkedIn**](https://www.linkedin.com/in/martin-lopez-8264132a8/)
 
