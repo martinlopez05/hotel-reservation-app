@@ -9,6 +9,18 @@ La aplicación está desplegada y disponible en el siguiente enlace:
 
 ---
 
+
+## 🧱 Arquitectura General
+
+<p align="center">
+  <img src="./Arquitectura%20de%20la%20Aplicación.jpg" alt="Arquitectura del Sistema" width="800">
+</p>
+
+> Diagrama general del sistema, mostrando la comunicación entre los microservicios, el API Gateway, las bases de datos y RabbitMQ.
+
+
+---
+
 ## 🚀 Tecnologías utilizadas
 
 ### 🧩 Backend (Microservicios)
@@ -235,16 +247,6 @@ El backend está desplegado en un **VPS** utilizando **Docker Compose** junto co
 - ✅ **Integración completa** entre **RabbitMQ** y **FeignClient**
 - ✅ **Balanceo y seguridad** gestionados con **Nginx**
 
----
-## 🧱 Arquitectura General
-
-<p align="center">
-  <img src="./Arquitectura%20de%20la%20Aplicación.jpg" alt="Arquitectura del Sistema" width="800">
-</p>
-
-> Diagrama general del sistema, mostrando la comunicación entre los microservicios, el API Gateway, las bases de datos y RabbitMQ.
-
----
 
 ## 👤 Autor
 
