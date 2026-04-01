@@ -121,7 +121,7 @@ public void handleRoomDeleted(Long roomId) {
 | 👤 **User / Auth Service** | Registro, login y manejo de roles *(admin / user)* | MySQL |
 | 💳 **Payment Service** | Procesamiento y gestión de pagos de reservas | PostgreSQL |
 | 📝 **Review Service** | Opiniones y calificaciones de usuarios | MongoDB |
-
+| 🛠️ Refactorización en curso: Implementando cobertura de pruebas unitarias en la capa de servicios con **JUnit 5 y Mockito**.
 ---
 
 ## 🔐 Seguridad
