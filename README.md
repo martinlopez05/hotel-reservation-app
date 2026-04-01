@@ -121,7 +121,6 @@ public void handleRoomDeleted(Long roomId) {
 | 👤 **User / Auth Service** | Registro, login y manejo de roles *(admin / user)* | MySQL |
 | 💳 **Payment Service** | Procesamiento y gestión de pagos de reservas | PostgreSQL |
 | 📝 **Review Service** | Opiniones y calificaciones de usuarios | MongoDB |
-| 🛠️ Refactorización en curso: Implementando cobertura de pruebas unitarias en la capa de servicios con **JUnit 5 y Mockito**.
 ---
 
 ## 🔐 Seguridad
@@ -158,7 +157,8 @@ El sistema utiliza **Spring Security + JWT (JSON Web Tokens)** para la autentica
 - 💻 Frontend base (React + Tailwind + Context API)  
 - 🐳 Dockerización final con Compose *(en progreso)*  
 - 📄 Documentación Swagger / Postman *(en desarrollo)*  
-- ☁️ Despliegue en VPS / Kubernetes *(planeado)*  
+- ☁️ Despliegue en VPS / Kubernetes *(planeado)*
+-  🛠️ Refactorización en curso: Implementando cobertura de pruebas unitarias en la capa de servicios con **JUnit 5 y Mockito**.
 
 ---
 
