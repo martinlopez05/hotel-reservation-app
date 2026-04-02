@@ -164,7 +164,7 @@ El sistema utiliza **Spring Security + JWT (JSON Web Tokens)** para la autentica
 
 ## 🧩 Cómo Ejecutar el Proyecto (Local)
 
-### 🔧 Prerrequisitos
+### 🔧 Prerequisitos
 - ☕ **Java 17+**  
 - 🛠️ **Maven 3.6+**  
 - 🐇 **RabbitMQ**  
