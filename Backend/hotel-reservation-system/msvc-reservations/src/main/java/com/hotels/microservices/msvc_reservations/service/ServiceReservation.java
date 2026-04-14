@@ -1,10 +1,10 @@
 package com.hotels.microservices.msvc_reservations.service;
 
-import com.hotels.microservices.msvc_reservations.Listener.UserListener;
 import com.hotels.microservices.msvc_reservations.client.HotelClientRest;
-import com.hotels.microservices.msvc_reservations.client.RoomCilentRest;
+import com.hotels.microservices.msvc_reservations.client.RoomClientRest;
 import com.hotels.microservices.msvc_reservations.client.UserClientRest;
 import com.hotels.microservices.msvc_reservations.dto.*;
+import com.hotels.microservices.msvc_reservations.exception.RoomIsReservedException;
 import com.hotels.microservices.msvc_reservations.mapper.IReservationMapper;
 import com.hotels.microservices.msvc_reservations.model.Reservation;
 import com.hotels.microservices.msvc_reservations.model.ReservationState;
@@ -28,7 +28,7 @@ public class ServiceReservation implements IServiceReservation{
     IReservationMapper reservationMapper;
 
     @Autowired
-    RoomCilentRest roomClientRest;
+    RoomClientRest roomClientRest;
 
     @Autowired
     HotelClientRest hotelClientRest;
@@ -39,8 +39,6 @@ public class ServiceReservation implements IServiceReservation{
     @Autowired
     UserClientRest userClientRest;
 
-    @Autowired
-    UserListener userListener;
 
     @Override
     public ReservationResponseDTO create(ReservationRequestDTO reservationRequestDTO) {
@@ -63,7 +61,7 @@ public class ServiceReservation implements IServiceReservation{
         }
 
         if (Boolean.TRUE.equals(exists)) {
-            throw new RuntimeException("Room is  reservated  on  the dates");
+            throw new RoomIsReservedException("Room is reserved  on  the dates");
         }
 
         RoomDTO roomDTO = roomClientRest.getRoom(reservationRequestDTO.getRoomId()).getBody();

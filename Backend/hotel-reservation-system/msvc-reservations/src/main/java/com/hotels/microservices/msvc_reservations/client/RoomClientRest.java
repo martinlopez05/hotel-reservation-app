@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "msvc-rooms")
-public interface RoomCilentRest {
+public interface RoomClientRest {
 
     @GetMapping("/rooms/{id}")
     public ResponseEntity<RoomDTO> getRoom(@PathVariable Long id);
