@@ -115,7 +115,7 @@ class ServiceReservationTest {
     }
 
     @Nested
-    class create {
+    class Create {
 
         @Test
         void  shouldReturnReservationDTO_whenReservationIsCreated(){
@@ -170,7 +170,7 @@ class ServiceReservationTest {
         }
 
         @Test
-        void  shouldThrowsRoomIsReservatedException_whenRoomIsReservated(){
+        void  shouldThrowRoomIsReservedException_whenRoomIsReserved(){
 
             given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan
                     (any(Long.class),any(LocalDate.class),any(LocalDate.class))).willReturn(true);
@@ -191,10 +191,10 @@ class ServiceReservationTest {
     }
 
     @Nested
-    class findById  {
+    class FindById  {
 
         @Test
-        void shouldReturnReservationResponseDTO_whenReservationExist(){
+        void shouldReturnReservationResponseDTO_whenReservationExists(){
 
             String idExist = "res-123";
 
@@ -215,7 +215,7 @@ class ServiceReservationTest {
         }
 
         @Test
-        void shouldThrowsReservationNotFoundException_whenReservationNotExist() {
+        void shouldThrowReservationNotFoundException_whenReservationDoesNotExist() {
             String idNotExist = "res-9999";
 
             given(repositoryReservation.findById(idNotExist)).willReturn(Optional.empty());
@@ -231,7 +231,7 @@ class ServiceReservationTest {
     }
 
     @Nested
-    class findAll{
+    class FindAll{
 
         @Test
         void shouldReturnListReservationResponseDTO_whenReservationsExist(){
@@ -258,7 +258,7 @@ class ServiceReservationTest {
 
 
         @Test
-        void shouldReturnEmptyList_whenNoReservationExist(){
+        void shouldReturnEmptyList_whenReservationsDoNotExist(){
             given(repositoryReservation.findAll()).willReturn(Collections.emptyList());
 
             List<ReservationResponseDTO> result = serviceReservation.findAll();
@@ -272,7 +272,7 @@ class ServiceReservationTest {
     }
 
     @Nested
-    class findByUserId{
+    class FindByUserId{
 
         @Test
         void shouldReturnListReservationResponseDTO_whenReservationExist(){
@@ -317,5 +317,39 @@ class ServiceReservationTest {
             verify(reservationMapper, never()).toReservationResponse(any());
         }
     }
+
+    @Nested
+    class DeleteById{
+
+        @Test
+        void shouldDelete_whenReservationExist(){
+
+            String idExist = "res-123";
+
+            given(repositoryReservation.existsById(idExist)).willReturn(true);
+
+            serviceReservation.deleteById(idExist);
+
+            verify(repositoryReservation).existsById(idExist);
+            verify(repositoryReservation).deleteById(idExist);
+        }
+
+        @Test
+        void shouldThrowReservationNotFoundException_whenReservationDoesNotExist(){
+
+            String idNotExist = "res-999";
+
+            given(repositoryReservation.existsById(idNotExist)).willReturn(false);
+
+            assertThrows(ReservationNotFoundException.class,()->{
+                serviceReservation.deleteById(idNotExist);
+            });
+
+            verify(repositoryReservation).existsById(idNotExist);
+            verify(repositoryReservation,never()).deleteById(idNotExist);
+        }
+
+    }
+
 
 }
