@@ -4,6 +4,7 @@ import com.hotels.microservices.msvc_reservations.client.HotelClientRest;
 import com.hotels.microservices.msvc_reservations.client.RoomClientRest;
 import com.hotels.microservices.msvc_reservations.client.UserClientRest;
 import com.hotels.microservices.msvc_reservations.dto.*;
+import com.hotels.microservices.msvc_reservations.exception.ReservationNotFoundException;
 import com.hotels.microservices.msvc_reservations.exception.RoomIsReservedException;
 import com.hotels.microservices.msvc_reservations.mapper.IReservationMapper;
 import com.hotels.microservices.msvc_reservations.model.Reservation;
@@ -98,7 +99,7 @@ public class ServiceReservation implements IServiceReservation{
     @Override
     public ReservationResponseDTO findById(String id) {
         Reservation reservation = repositoryReservation.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Reservation not found"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found"));
 
         ReservationResponseDTO dto = reservationMapper.toReservationResponse(reservation);
 
@@ -134,7 +135,7 @@ public class ServiceReservation implements IServiceReservation{
     @Override
     public ReservationResponseDTO updateState(String reservationId, ReservationState newState) {
         Reservation reservation = repositoryReservation.findById(reservationId)
-                .orElseThrow(() -> new EntityNotFoundException("Reservation not found"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found"));
 
         reservation.setState(newState);
         repositoryReservation.save(reservation);
