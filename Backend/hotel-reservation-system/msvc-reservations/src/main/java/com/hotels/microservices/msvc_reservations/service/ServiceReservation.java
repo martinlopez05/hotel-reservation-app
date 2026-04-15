@@ -126,7 +126,7 @@ public class ServiceReservation implements IServiceReservation{
     @Override
     public void deleteById(String id) {
         if(!repositoryReservation.existsById(id)) {
-            throw new EntityNotFoundException("Reservation not found");
+            throw new ReservationNotFoundException("Reservation not found");
         }
         repositoryReservation.deleteById(id);
     }
