@@ -149,6 +149,27 @@ class ServiceReservationTest {
         }
 
         @Test
+        void shouldCalculateOneDayPrice_whenCheckInAndCheckOutAreSameDay() {
+
+            reservationRequestDTO.setCheckOutDate(reservationRequestDTO.getCheckInDate());
+
+            given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
+                    any(Long.class), any(LocalDate.class), any(LocalDate.class))).willReturn(false);
+
+            given(roomClientRest.getRoom(any(Long.class))).willReturn(ResponseEntity.ok(roomDTO));
+            given(reservationMapper.toReservation(any(ReservationRequestDTO.class))).willReturn(reservation);
+            given(sequenceGeneratorService.generateSequence(anyString())).willReturn(1L);
+            given(repositoryReservation.save(any())).willReturn(reservation);
+            given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
+            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
+            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
+
+            serviceReservation.create(reservationRequestDTO);
+
+            assertEquals(100.00, reservation.getPrice()); // verifica si realmente se cobro por 1 día solo
+        }
+
+        @Test
         void  shouldThrowsRoomIsReservatedException_whenRoomIsReservated(){
 
             given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan
@@ -164,6 +185,8 @@ class ServiceReservationTest {
             verify(roomClientRest,never()).getRoom(reservationRequestDTO.getRoomId());
 
         }
+
+
 
     }
 
