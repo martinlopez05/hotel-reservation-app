@@ -352,4 +352,50 @@ class ServiceReservationTest {
     }
 
 
+    @Nested
+    class UpdateState{
+
+        @Test
+        void shouldReturnReservationResponseDTO_whenReservationExists(){
+
+            String idExist = "res-123";
+
+            given(repositoryReservation.findById(idExist)).willReturn(Optional.of(reservation));
+            given(repositoryReservation.save(reservation)).willReturn(reservation);
+            given(reservationMapper.toReservationResponse(reservation)).willReturn(reservationResponseDTO);
+            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
+            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
+            given(roomClientRest.getRoom(any(Long.class))).willReturn(ResponseEntity.ok(roomDTO));
+
+            ReservationResponseDTO result = serviceReservation.updateState(idExist,ReservationState.PAYMENT);
+
+            assertNotNull(result);
+
+            assertEquals(ReservationState.PAYMENT, reservation.getState());
+            verify(repositoryReservation).findById(idExist);
+            verify(repositoryReservation).save(reservation);
+
+        }
+
+        @Test
+        void shouldThrowReservationNotFoundException_whenReservationDoesNotExist() {
+
+            String idNotExist = "res-999";
+
+            given(repositoryReservation.findById(idNotExist)).willReturn(Optional.empty());
+
+            assertThrows(ReservationNotFoundException.class, () -> {
+                serviceReservation.updateState(idNotExist, ReservationState.PAYMENT);
+            });
+
+            verify(repositoryReservation).findById(idNotExist);
+            verify(repositoryReservation,never()).save(reservation);
+
+        }
+
+    }
+
+
+
+
 }
