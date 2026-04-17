@@ -4,12 +4,12 @@ import com.hotels.microservices.msvc_reservations.client.HotelClientRest;
 import com.hotels.microservices.msvc_reservations.client.RoomClientRest;
 import com.hotels.microservices.msvc_reservations.client.UserClientRest;
 import com.hotels.microservices.msvc_reservations.dto.*;
-import com.hotels.microservices.msvc_reservations.exception.ReservationNotFoundException;
-import com.hotels.microservices.msvc_reservations.exception.RoomIsReservedException;
+import com.hotels.microservices.msvc_reservations.exception.*;
 import com.hotels.microservices.msvc_reservations.mapper.IReservationMapper;
 import com.hotels.microservices.msvc_reservations.model.Reservation;
 import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.repository.IRepositoryReservation;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ServiceReservation implements IServiceReservation{
@@ -44,28 +45,11 @@ public class ServiceReservation implements IServiceReservation{
     @Override
     public ReservationResponseDTO create(ReservationRequestDTO reservationRequestDTO) {
 
-        boolean exists = repositoryReservation
-                .existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
-                        reservationRequestDTO.getRoomId(),
-                        reservationRequestDTO.getCheckOutDate(),
-                        reservationRequestDTO.getCheckInDate()
-                );
+        long days = sanitizeDatesAndCalculateDays(reservationRequestDTO);
 
-        if (reservationRequestDTO.getCheckOutDate() == null
-                || reservationRequestDTO.getCheckOutDate().isEqual(reservationRequestDTO.getCheckInDate())) {
-            reservationRequestDTO.setCheckOutDate(reservationRequestDTO.getCheckInDate());
-        }
+        validateRoomAvailabity(reservationRequestDTO);
 
-        long days = ChronoUnit.DAYS.between(reservationRequestDTO.getCheckInDate(), reservationRequestDTO.getCheckOutDate());
-        if (days == 0){
-            days = 1;
-        }
-
-        if (Boolean.TRUE.equals(exists)) {
-            throw new RoomIsReservedException("Room is reserved  on  the dates");
-        }
-
-        RoomDTO roomDTO = roomClientRest.getRoom(reservationRequestDTO.getRoomId()).getBody();
+        RoomDTO roomDTO = getRoomData(reservationRequestDTO.getRoomId());
 
         Reservation reservation = reservationMapper.toReservation(reservationRequestDTO);
 
@@ -76,7 +60,6 @@ public class ServiceReservation implements IServiceReservation{
 
         ReservationResponseDTO reservationResponseDTO = reservationMapper.toReservationResponse(reservation);
         enrichReservationDTO(reservationResponseDTO,reservation);
-
 
         return reservationResponseDTO;
 
@@ -142,13 +125,71 @@ public class ServiceReservation implements IServiceReservation{
 
 
     private void enrichReservationDTO(ReservationResponseDTO dto, Reservation reservation) {
-        RoomDTO roomDTO = roomClientRest.getRoom(reservation.getRoomId()).getBody();
-        HotelDTO hotelDTO = hotelClientRest.getHotel(reservation.getHotelId(), false).getBody();
-        UserDTO userDTO = userClientRest.getUser(reservation.getUserId()).getBody();
+        RoomDTO roomDTO = getRoomData(reservation.getRoomId());
+        HotelDTO hotelDTO = getHotelData(reservation.getHotelId());
+        UserDTO userDTO = getUserData(reservation.getUserId());
 
-        dto.setRoomNumber(roomDTO != null ? roomDTO.getRoomNumber() : 0);
-        dto.setHotelName(hotelDTO != null ? hotelDTO.getName() : null);
-        dto.setUsername(userDTO != null ? userDTO.getUsername() : null);
+        dto.setRoomNumber(roomDTO.getRoomNumber());
+        dto.setHotelName(hotelDTO.getName());
+        dto.setUsername(userDTO.getUsername());
+    }
+
+    private void validateRoomAvailabity(ReservationRequestDTO dto){
+        boolean isReserved = repositoryReservation
+                .existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
+                        dto.getRoomId(),
+                        dto.getCheckOutDate(),
+                        dto.getCheckInDate()
+                );
+
+        if(isReserved){
+            throw new RoomIsReservedException("Room is reserved on the dates");
+        }
+    }
+
+    private long sanitizeDatesAndCalculateDays(ReservationRequestDTO dto) {
+        if (dto.getCheckOutDate() == null || dto.getCheckOutDate().isEqual(dto.getCheckInDate())) {
+            dto.setCheckOutDate(dto.getCheckInDate());
+        }
+
+        long days = ChronoUnit.DAYS.between(dto.getCheckInDate(), dto.getCheckOutDate());
+        return days == 0 ? 1 : days;
+    }
+
+    private RoomDTO getRoomData(Long roomId) {
+        try {
+            return roomClientRest.getRoom(roomId).getBody();
+
+        } catch (FeignException.NotFound e) {
+            throw new RoomNotFoundException("The room with ID " + roomId + " not exist.");
+
+        } catch (FeignException e) {
+            throw new ExternalServiceException("The service Room is not availabity.");
+        }
+    }
+
+    private HotelDTO getHotelData(Long hotelId) {
+        try {
+            return hotelClientRest.getHotel(hotelId,false).getBody();
+
+        } catch (FeignException.NotFound e) {
+            throw new HotelNotFoundException("The hotel with ID " + hotelId + " not exist.");
+
+        } catch (FeignException e) {
+            throw new ExternalServiceException("The service Hotel is not availabity.");
+        }
+    }
+
+    private UserDTO getUserData(Long userId) {
+        try {
+            return userClientRest.getUser(userId).getBody();
+
+        } catch (FeignException.NotFound e) {
+            throw new UserNotFoundException("The user with ID " + userId + " not exist.");
+
+        } catch (FeignException e) {
+            throw new ExternalServiceException("The service User is not availabity.");
+        }
     }
 
 
