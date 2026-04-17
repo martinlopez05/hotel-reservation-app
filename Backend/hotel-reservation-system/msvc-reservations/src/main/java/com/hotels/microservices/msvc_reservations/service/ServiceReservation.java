@@ -109,17 +109,13 @@ public class ServiceReservation implements IServiceReservation{
 
     @Override
     public List<ReservationResponseDTO> findByUserId(Long userId) {
-        List<Reservation> reservations = repositoryReservation.findByUserId(userId);
-        List<ReservationResponseDTO> responseList = new ArrayList<>();
-
-        for (Reservation r : reservations) {
-            ReservationResponseDTO dto = reservationMapper.toReservationResponse(r);
-            enrichReservationDTO(dto,r);
-            responseList.add(dto);
-        }
-
-        return responseList;
-
+        return repositoryReservation.findByUserId(userId).stream()
+                .map(r -> {
+                    ReservationResponseDTO dto = reservationMapper.toReservationResponse(r);
+                    enrichReservationDTO(dto,r);
+                    return dto;
+                })
+                .toList();
     }
 
     @Override
