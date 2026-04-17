@@ -14,7 +14,6 @@ public class RoomListener {
 
     @RabbitListener(queues = RabbitRoomListenerConfig.QUEUE)
     public void handleRoomDeleted(Long roomId) {
-        System.out.println("Recibido mensaje de habitación eliminada: " + roomId);
         repositoryReservation.deleteAllByRoomId(roomId);
     }
 }

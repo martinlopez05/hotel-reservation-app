@@ -6,10 +6,12 @@ import com.hotels.microservices.msvc_reservations.client.UserClientRest;
 import com.hotels.microservices.msvc_reservations.dto.*;
 import com.hotels.microservices.msvc_reservations.exception.ReservationNotFoundException;
 import com.hotels.microservices.msvc_reservations.exception.RoomIsReservedException;
+import com.hotels.microservices.msvc_reservations.exception.RoomNotFoundException;
 import com.hotels.microservices.msvc_reservations.mapper.IReservationMapper;
 import com.hotels.microservices.msvc_reservations.model.Reservation;
 import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.repository.IRepositoryReservation;
+import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -394,8 +396,5 @@ class ServiceReservationTest {
         }
 
     }
-
-
-
 
 }

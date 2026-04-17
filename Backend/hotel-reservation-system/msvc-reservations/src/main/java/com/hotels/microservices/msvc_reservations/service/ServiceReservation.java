@@ -10,36 +10,33 @@ import com.hotels.microservices.msvc_reservations.model.Reservation;
 import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.repository.IRepositoryReservation;
 import feign.FeignException;
-import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ServiceReservation implements IServiceReservation{
 
+    private final IRepositoryReservation repositoryReservation;
 
-    @Autowired
-    IRepositoryReservation repositoryReservation;
 
-    @Autowired
-    IReservationMapper reservationMapper;
+    private final IReservationMapper reservationMapper;
 
-    @Autowired
-    RoomClientRest roomClientRest;
 
-    @Autowired
-    HotelClientRest hotelClientRest;
+    private final RoomClientRest roomClientRest;
 
-    @Autowired
-    SequenceGeneratorService sequenceGenerator;
 
-    @Autowired
-    UserClientRest userClientRest;
+    private final HotelClientRest hotelClientRest;
+
+
+    private final SequenceGeneratorService sequenceGenerator;
+
+
+    private final UserClientRest userClientRest;
 
 
     @Override
@@ -47,7 +44,7 @@ public class ServiceReservation implements IServiceReservation{
 
         long days = sanitizeDatesAndCalculateDays(reservationRequestDTO);
 
-        validateRoomAvailabity(reservationRequestDTO);
+        validateRoomAvailability(reservationRequestDTO);
 
         RoomDTO roomDTO = getRoomData(reservationRequestDTO.getRoomId());
 
@@ -134,7 +131,7 @@ public class ServiceReservation implements IServiceReservation{
         dto.setUsername(userDTO.getUsername());
     }
 
-    private void validateRoomAvailabity(ReservationRequestDTO dto){
+    private void validateRoomAvailability(ReservationRequestDTO dto){
         boolean isReserved = repositoryReservation
                 .existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
                         dto.getRoomId(),

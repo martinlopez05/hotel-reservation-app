@@ -6,6 +6,7 @@ import com.hotels.microservices.msvc_reservations.model.Reservation;
 import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.service.IServiceReservation;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +16,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/reservations")
+@RequiredArgsConstructor
 public class ReservationController {
 
-    @Autowired
-    IServiceReservation serviceReservation;
+
+    private final IServiceReservation serviceReservation;
 
     @GetMapping
     public ResponseEntity<List<ReservationResponseDTO>> getAllReservations(){
@@ -42,7 +44,7 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteReservation(@PathVariable String id){
+    public ResponseEntity<Void> deleteReservation(@PathVariable String id){
         serviceReservation.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -52,10 +54,9 @@ public class ReservationController {
             @PathVariable String id,
             @RequestParam String state) {
         ReservationState newState = ReservationState.valueOf(state.toUpperCase());
+
         ReservationResponseDTO updated = serviceReservation.updateState(id, newState);
         return ResponseEntity.ok(updated);
     }
-
-
 
 }
