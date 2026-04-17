@@ -4,12 +4,15 @@ import com.hotels.microservices.msvc_reservations.client.HotelClientRest;
 import com.hotels.microservices.msvc_reservations.client.RoomClientRest;
 import com.hotels.microservices.msvc_reservations.client.UserClientRest;
 import com.hotels.microservices.msvc_reservations.dto.*;
+import com.hotels.microservices.msvc_reservations.exception.ExternalServiceException;
 import com.hotels.microservices.msvc_reservations.exception.ReservationNotFoundException;
 import com.hotels.microservices.msvc_reservations.exception.RoomIsReservedException;
+import com.hotels.microservices.msvc_reservations.exception.RoomNotFoundException;
 import com.hotels.microservices.msvc_reservations.mapper.IReservationMapper;
 import com.hotels.microservices.msvc_reservations.model.Reservation;
 import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.repository.IRepositoryReservation;
+import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -184,6 +187,63 @@ class ServiceReservationTest {
             verify(reservationMapper,never()).toReservation(reservationRequestDTO);
             verify(roomClientRest,never()).getRoom(reservationRequestDTO.getRoomId());
 
+        }
+
+        @Test
+        void shouldCalculateOneDayPrice_whenCheckOutDateIsNull() {
+
+
+            reservationRequestDTO.setCheckOutDate(null);
+
+            given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
+                    any(Long.class), any(LocalDate.class), any(LocalDate.class))).willReturn(false);
+
+            given(roomClientRest.getRoom(any(Long.class))).willReturn(ResponseEntity.ok(roomDTO));
+            given(reservationMapper.toReservation(any(ReservationRequestDTO.class))).willReturn(reservation);
+            given(sequenceGeneratorService.generateSequence(anyString())).willReturn(1L);
+            given(repositoryReservation.save(any())).willReturn(reservation);
+            given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
+            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
+            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
+
+            serviceReservation.create(reservationRequestDTO);
+
+
+            assertEquals(100.00, reservation.getPrice());
+        }
+
+        @Test
+        void shouldThrowRoomNotFoundException_whenRoomClientReturns404() {
+
+            given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
+                    any(Long.class), any(LocalDate.class), any(LocalDate.class))).willReturn(false);
+
+            FeignException.NotFound feignNotFound = mock(FeignException.NotFound.class);
+            given(roomClientRest.getRoom(anyLong())).willThrow(feignNotFound);
+
+
+            assertThrows(RoomNotFoundException.class, () -> {
+                serviceReservation.create(reservationRequestDTO);
+            });
+
+            verify(repositoryReservation, never()).save(any());
+        }
+
+        @Test
+        void shouldThrowExternalServiceException_whenRoomClientIsDown() {
+
+            given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
+                    any(Long.class), any(LocalDate.class), any(LocalDate.class))).willReturn(false);
+
+            FeignException feignError = mock(FeignException.class);
+            given(roomClientRest.getRoom(anyLong())).willThrow(feignError);
+
+
+            assertThrows(ExternalServiceException.class, () -> {
+                serviceReservation.create(reservationRequestDTO);
+            });
+
+            verify(repositoryReservation, never()).save(any());
         }
 
 
@@ -394,8 +454,5 @@ class ServiceReservationTest {
         }
 
     }
-
-
-
 
 }
