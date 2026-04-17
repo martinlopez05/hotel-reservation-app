@@ -84,17 +84,16 @@ public class ServiceReservation implements IServiceReservation{
 
     @Override
     public List<ReservationResponseDTO> findAll() {
-        List<Reservation> reservations = repositoryReservation.findAll();
-        List<ReservationResponseDTO> responseList = new ArrayList<>();
+        return repositoryReservation.findAll().stream()
+                .map(r -> {
+                    ReservationResponseDTO dto = reservationMapper.toReservationResponse(r);
+                    enrichReservationDTO(dto, r);
+                    return dto;
+                }).toList();
 
-        for (Reservation r : reservations) {
-            ReservationResponseDTO dto = reservationMapper.toReservationResponse(r);
-            enrichReservationDTO(dto,r);
-            responseList.add(dto);
-        }
-
-        return responseList;
     }
+
+
 
     @Override
     public ReservationResponseDTO findById(String id) {
