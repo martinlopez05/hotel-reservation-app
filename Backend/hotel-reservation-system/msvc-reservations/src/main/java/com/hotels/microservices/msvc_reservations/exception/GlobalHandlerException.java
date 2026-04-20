@@ -4,8 +4,11 @@ package com.hotels.microservices.msvc_reservations.exception;
 import com.hotels.microservices.msvc_reservations.dto.ErrorResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 
 @RestControllerAdvice
@@ -56,6 +59,23 @@ public class GlobalHandlerException {
     public ResponseEntity<ErrorResponseDTO> handleIllegalArgumentException(IllegalArgumentException e){
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
                 .message("Data invalid: " + e.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .timestamp(System.currentTimeMillis())
+                .build();
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDTO> handleValidationExceptions(MethodArgumentNotValidException e) {
+        String errorMessage = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
+                .message("Validation failed: [" + errorMessage + "]")
                 .status(HttpStatus.BAD_REQUEST.value())
                 .timestamp(System.currentTimeMillis())
                 .build();

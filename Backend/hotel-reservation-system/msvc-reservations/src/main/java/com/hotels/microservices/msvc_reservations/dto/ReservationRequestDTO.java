@@ -1,5 +1,7 @@
 package com.hotels.microservices.msvc_reservations.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -24,8 +26,11 @@ public class ReservationRequestDTO {
     @NotNull(message = "userId is null")
     private Long userId;
 
+    @NotNull(message = "checkInDate is required")
+    @FutureOrPresent(message = "checkInDate must be today or in the future")
     private LocalDate checkInDate;
 
+    @FutureOrPresent(message = "checkOutDate must be today or in the future")
     private LocalDate checkOutDate;
 
 }
