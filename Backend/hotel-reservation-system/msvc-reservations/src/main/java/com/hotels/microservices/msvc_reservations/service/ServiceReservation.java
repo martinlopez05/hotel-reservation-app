@@ -11,7 +11,6 @@ import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.repository.IRepositoryReservation;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
@@ -44,22 +43,27 @@ public class ServiceReservation implements IServiceReservation{
 
         long days = sanitizeDatesAndCalculateDays(reservationRequestDTO);
 
-        validateRoomAvailability(reservationRequestDTO);
-
+        UserDTO userDTO = getUserData(reservationRequestDTO.getUserId());
+        HotelDTO hotelDTO = getHotelData(reservationRequestDTO.getHotelId());
         RoomDTO roomDTO = getRoomData(reservationRequestDTO.getRoomId());
 
-        Reservation reservation = reservationMapper.toReservation(reservationRequestDTO);
 
+        validateRoomAvailability(reservationRequestDTO);
+
+
+        Reservation reservation = reservationMapper.toReservation(reservationRequestDTO);
         reservation.setPrice(roomDTO.getPricePerNight() * days);
         reservation.setOrderNumber(sequenceGenerator.generateSequence("reservationOrder"));
         reservation.setState(ReservationState.PENDING);
+
         repositoryReservation.save(reservation);
 
         ReservationResponseDTO reservationResponseDTO = reservationMapper.toReservationResponse(reservation);
-        enrichReservationDTO(reservationResponseDTO,reservation);
+        reservationResponseDTO.setRoomNumber(roomDTO.getRoomNumber());
+        reservationResponseDTO.setHotelName(hotelDTO.getName());
+        reservationResponseDTO.setUsername(userDTO.getUsername());
 
         return reservationResponseDTO;
-
     }
 
     @Override
@@ -78,7 +82,7 @@ public class ServiceReservation implements IServiceReservation{
     @Override
     public ReservationResponseDTO findById(String id) {
         Reservation reservation = repositoryReservation.findById(id)
-                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation " + id + " not found"));
 
         ReservationResponseDTO dto = reservationMapper.toReservationResponse(reservation);
 
@@ -101,7 +105,7 @@ public class ServiceReservation implements IServiceReservation{
     @Override
     public void deleteById(String id) {
         if(!repositoryReservation.existsById(id)) {
-            throw new ReservationNotFoundException("Reservation not found");
+            throw new ReservationNotFoundException("Reservation " + id + " not found");
         }
         repositoryReservation.deleteById(id);
     }
@@ -110,7 +114,7 @@ public class ServiceReservation implements IServiceReservation{
     @Override
     public ReservationResponseDTO updateState(String reservationId, ReservationState newState) {
         Reservation reservation = repositoryReservation.findById(reservationId)
-                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation " + reservationId + " not found"));
 
         reservation.setState(newState);
         repositoryReservation.save(reservation);
@@ -146,7 +150,7 @@ public class ServiceReservation implements IServiceReservation{
 
     private long sanitizeDatesAndCalculateDays(ReservationRequestDTO dto) {
         if (dto.getCheckOutDate() == null || dto.getCheckOutDate().isEqual(dto.getCheckInDate())) {
-            dto.setCheckOutDate(dto.getCheckInDate());
+            dto.setCheckOutDate(dto.getCheckInDate().plusDays(1));
         }
 
         long days = ChronoUnit.DAYS.between(dto.getCheckInDate(), dto.getCheckOutDate());
@@ -158,10 +162,10 @@ public class ServiceReservation implements IServiceReservation{
             return roomClientRest.getRoom(roomId).getBody();
 
         } catch (FeignException.NotFound e) {
-            throw new RoomNotFoundException("The room with ID " + roomId + " not exist.");
+            throw new RoomNotFoundException("The room with ID " + roomId + " does not exist.");
 
         } catch (FeignException e) {
-            throw new ExternalServiceException("The service Room is not availabity.");
+            throw new ExternalServiceException("The Room service is currently unavailable.");
         }
     }
 
@@ -170,10 +174,10 @@ public class ServiceReservation implements IServiceReservation{
             return hotelClientRest.getHotel(hotelId,false).getBody();
 
         } catch (FeignException.NotFound e) {
-            throw new HotelNotFoundException("The hotel with ID " + hotelId + " not exist.");
+            throw new HotelNotFoundException("The hotel with ID " + hotelId + " does not exist.");
 
         } catch (FeignException e) {
-            throw new ExternalServiceException("The service Hotel is not availabity.");
+            throw new ExternalServiceException("The Hotel service is currently unavailable.");
         }
     }
 
@@ -182,10 +186,10 @@ public class ServiceReservation implements IServiceReservation{
             return userClientRest.getUser(userId).getBody();
 
         } catch (FeignException.NotFound e) {
-            throw new UserNotFoundException("The user with ID " + userId + " not exist.");
+            throw new UserNotFoundException("The user with ID " + userId + " does not exist.");
 
         } catch (FeignException e) {
-            throw new ExternalServiceException("The service User is not availabity.");
+            throw new ExternalServiceException("The User service is currently unavailable.");
         }
     }
 
