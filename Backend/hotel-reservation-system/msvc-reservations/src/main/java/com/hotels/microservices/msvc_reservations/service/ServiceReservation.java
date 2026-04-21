@@ -43,22 +43,27 @@ public class ServiceReservation implements IServiceReservation{
 
         long days = sanitizeDatesAndCalculateDays(reservationRequestDTO);
 
-        validateRoomAvailability(reservationRequestDTO);
-
+        UserDTO userDTO = getUserData(reservationRequestDTO.getUserId());
+        HotelDTO hotelDTO = getHotelData(reservationRequestDTO.getHotelId());
         RoomDTO roomDTO = getRoomData(reservationRequestDTO.getRoomId());
 
-        Reservation reservation = reservationMapper.toReservation(reservationRequestDTO);
 
+        validateRoomAvailability(reservationRequestDTO);
+
+
+        Reservation reservation = reservationMapper.toReservation(reservationRequestDTO);
         reservation.setPrice(roomDTO.getPricePerNight() * days);
         reservation.setOrderNumber(sequenceGenerator.generateSequence("reservationOrder"));
         reservation.setState(ReservationState.PENDING);
+
         repositoryReservation.save(reservation);
 
         ReservationResponseDTO reservationResponseDTO = reservationMapper.toReservationResponse(reservation);
-        enrichReservationDTO(reservationResponseDTO,reservation);
+        reservationResponseDTO.setRoomNumber(roomDTO.getRoomNumber());
+        reservationResponseDTO.setHotelName(hotelDTO.getName());
+        reservationResponseDTO.setUsername(userDTO.getUsername());
 
         return reservationResponseDTO;
-
     }
 
     @Override
@@ -145,7 +150,7 @@ public class ServiceReservation implements IServiceReservation{
 
     private long sanitizeDatesAndCalculateDays(ReservationRequestDTO dto) {
         if (dto.getCheckOutDate() == null || dto.getCheckOutDate().isEqual(dto.getCheckInDate())) {
-            dto.setCheckOutDate(dto.getCheckInDate());
+            dto.setCheckOutDate(dto.getCheckInDate().plusDays(1));
         }
 
         long days = ChronoUnit.DAYS.between(dto.getCheckInDate(), dto.getCheckOutDate());
