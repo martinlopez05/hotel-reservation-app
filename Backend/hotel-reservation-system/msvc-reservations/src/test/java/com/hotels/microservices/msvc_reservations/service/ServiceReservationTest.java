@@ -4,10 +4,7 @@ import com.hotels.microservices.msvc_reservations.client.HotelClientRest;
 import com.hotels.microservices.msvc_reservations.client.RoomClientRest;
 import com.hotels.microservices.msvc_reservations.client.UserClientRest;
 import com.hotels.microservices.msvc_reservations.dto.*;
-import com.hotels.microservices.msvc_reservations.exception.ExternalServiceException;
-import com.hotels.microservices.msvc_reservations.exception.ReservationNotFoundException;
-import com.hotels.microservices.msvc_reservations.exception.RoomIsReservedException;
-import com.hotels.microservices.msvc_reservations.exception.RoomNotFoundException;
+import com.hotels.microservices.msvc_reservations.exception.*;
 import com.hotels.microservices.msvc_reservations.mapper.IReservationMapper;
 import com.hotels.microservices.msvc_reservations.model.Reservation;
 import com.hotels.microservices.msvc_reservations.model.ReservationState;
@@ -124,9 +121,9 @@ class ServiceReservationTest {
         void  shouldReturnReservationDTO_whenReservationIsCreated(){
 
             given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan
-                    (any(Long.class),any(LocalDate.class),any(LocalDate.class))).willReturn(false);
+                    (anyLong(),any(),any())).willReturn(false);
 
-            given(roomClientRest.getRoom(any(Long.class))).willReturn(ResponseEntity.ok(roomDTO));
+            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
 
             given(reservationMapper.toReservation(any(ReservationRequestDTO.class))).willReturn(reservation);
 
@@ -157,9 +154,9 @@ class ServiceReservationTest {
             reservationRequestDTO.setCheckOutDate(reservationRequestDTO.getCheckInDate());
 
             given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
-                    any(Long.class), any(LocalDate.class), any(LocalDate.class))).willReturn(false);
+                    anyLong(), any(), any())).willReturn(false);
 
-            given(roomClientRest.getRoom(any(Long.class))).willReturn(ResponseEntity.ok(roomDTO));
+            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
             given(reservationMapper.toReservation(any(ReservationRequestDTO.class))).willReturn(reservation);
             given(sequenceGeneratorService.generateSequence(anyString())).willReturn(1L);
             given(repositoryReservation.save(any())).willReturn(reservation);
@@ -176,16 +173,18 @@ class ServiceReservationTest {
         void  shouldThrowRoomIsReservedException_whenRoomIsReserved(){
 
             given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan
-                    (any(Long.class),any(LocalDate.class),any(LocalDate.class))).willReturn(true);
+                    (anyLong(),any(),any())).willReturn(true);
 
+            given(hotelClientRest.getHotel(anyLong(),eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
+            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
+            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
 
             assertThrows(RoomIsReservedException.class, () -> {
                 serviceReservation.create(reservationRequestDTO);
             });
 
-            verify(roomClientRest,never()).getRoom(reservationRequestDTO.getRoomId());
+            verify(roomClientRest).getRoom(reservationRequestDTO.getRoomId());
             verify(reservationMapper,never()).toReservation(reservationRequestDTO);
-            verify(roomClientRest,never()).getRoom(reservationRequestDTO.getRoomId());
 
         }
 
@@ -196,9 +195,9 @@ class ServiceReservationTest {
             reservationRequestDTO.setCheckOutDate(null);
 
             given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
-                    any(Long.class), any(LocalDate.class), any(LocalDate.class))).willReturn(false);
+                    anyLong(), any(), any())).willReturn(false);
 
-            given(roomClientRest.getRoom(any(Long.class))).willReturn(ResponseEntity.ok(roomDTO));
+            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
             given(reservationMapper.toReservation(any(ReservationRequestDTO.class))).willReturn(reservation);
             given(sequenceGeneratorService.generateSequence(anyString())).willReturn(1L);
             given(repositoryReservation.save(any())).willReturn(reservation);
@@ -215,12 +214,10 @@ class ServiceReservationTest {
         @Test
         void shouldThrowRoomNotFoundException_whenRoomClientReturns404() {
 
-            given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
-                    any(Long.class), any(LocalDate.class), any(LocalDate.class))).willReturn(false);
-
             FeignException.NotFound feignNotFound = mock(FeignException.NotFound.class);
             given(roomClientRest.getRoom(anyLong())).willThrow(feignNotFound);
-
+            given(hotelClientRest.getHotel(anyLong(),eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
+            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
 
             assertThrows(RoomNotFoundException.class, () -> {
                 serviceReservation.create(reservationRequestDTO);
@@ -232,11 +229,10 @@ class ServiceReservationTest {
         @Test
         void shouldThrowExternalServiceException_whenRoomClientIsDown() {
 
-            given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
-                    any(Long.class), any(LocalDate.class), any(LocalDate.class))).willReturn(false);
-
             FeignException feignError = mock(FeignException.class);
             given(roomClientRest.getRoom(anyLong())).willThrow(feignError);
+            given(hotelClientRest.getHotel(anyLong(),eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
+            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
 
 
             assertThrows(ExternalServiceException.class, () -> {
@@ -244,6 +240,66 @@ class ServiceReservationTest {
             });
 
             verify(repositoryReservation, never()).save(any());
+        }
+
+        @Test
+        void shouldThrowExternalServiceException_whenHotelClientIsDown() {
+
+            FeignException feignError = mock(FeignException.class);
+            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
+            given(hotelClientRest.getHotel(anyLong(), eq(false))).willThrow(feignError);
+
+
+            assertThrows(ExternalServiceException.class, () -> {
+                serviceReservation.create(reservationRequestDTO);
+            });
+
+            verify(repositoryReservation, never()).save(any());
+            verify(roomClientRest,never()).getRoom(reservationRequestDTO.getRoomId());
+        }
+
+        @Test
+        void shouldThrowExternalServiceException_whenUserClientIsDown() {
+
+            FeignException feignError = mock(FeignException.class);
+            given(userClientRest.getUser(anyLong())).willThrow(feignError);
+
+
+            assertThrows(ExternalServiceException.class, () -> {
+                serviceReservation.create(reservationRequestDTO);
+            });
+
+            verify(repositoryReservation, never()).save(any());
+        }
+
+        @Test
+        void shouldThrowUserNotFoundException_whenUserClientReturns404() {
+
+            FeignException.NotFound feignNotFound = mock(FeignException.NotFound.class);
+            given(userClientRest.getUser(anyLong())).willThrow(feignNotFound);
+
+            assertThrows(UserNotFoundException.class, () -> {
+                serviceReservation.create(reservationRequestDTO);
+            });
+
+            verify(repositoryReservation, never()).save(any());
+            verify(hotelClientRest,never()).getHotel(reservationRequestDTO.getHotelId(),false);
+            verify(roomClientRest,never()).getRoom(reservationRequestDTO.getRoomId());
+        }
+
+        @Test
+        void shouldThrowHotelNotFoundException_whenHotelClientReturns404() {
+
+            FeignException.NotFound feignNotFound = mock(FeignException.NotFound.class);
+            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
+            given(hotelClientRest.getHotel(anyLong(),eq(false))).willThrow(feignNotFound);
+
+            assertThrows(HotelNotFoundException.class, () -> {
+                serviceReservation.create(reservationRequestDTO);
+            });
+
+            verify(repositoryReservation, never()).save(any());
+            verify(roomClientRest,never()).getRoom(reservationRequestDTO.getRoomId());
         }
 
 
@@ -262,7 +318,7 @@ class ServiceReservationTest {
             given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
             given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
             given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(roomClientRest.getRoom(any(Long.class))).willReturn(ResponseEntity.ok(roomDTO));
+            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
 
             ReservationResponseDTO result = serviceReservation.findById(idExist);
 
@@ -302,7 +358,7 @@ class ServiceReservationTest {
             given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
             given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
             given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(roomClientRest.getRoom(any(Long.class))).willReturn(ResponseEntity.ok(roomDTO));
+            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
 
             List<ReservationResponseDTO> result = serviceReservation.findAll();
 
@@ -345,7 +401,7 @@ class ServiceReservationTest {
             given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
             given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
             given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(roomClientRest.getRoom(any(Long.class))).willReturn(ResponseEntity.ok(roomDTO));
+            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
 
             List<ReservationResponseDTO> result = serviceReservation.findByUserId(idUser);
 
@@ -425,7 +481,7 @@ class ServiceReservationTest {
             given(reservationMapper.toReservationResponse(reservation)).willReturn(reservationResponseDTO);
             given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
             given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(roomClientRest.getRoom(any(Long.class))).willReturn(ResponseEntity.ok(roomDTO));
+            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
 
             ReservationResponseDTO result = serviceReservation.updateState(idExist,ReservationState.PAYMENT);
 
