@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 
 
 @SpringBootApplication
-@EnableMongoAuditing
 @EnableFeignClients
 @EnableDiscoveryClient
 public class MsvcReservationsApplication {
