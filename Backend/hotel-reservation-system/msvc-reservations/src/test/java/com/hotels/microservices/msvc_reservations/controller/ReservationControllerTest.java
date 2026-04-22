@@ -1,5 +1,6 @@
 package com.hotels.microservices.msvc_reservations.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotels.microservices.msvc_reservations.dto.ReservationRequestDTO;
 import com.hotels.microservices.msvc_reservations.dto.ReservationResponseDTO;
@@ -14,7 +15,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -22,7 +25,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -81,7 +84,7 @@ class ReservationControllerTest {
     class GetAllReservations {
 
         @Test
-        void shouldReturnListReservationResponseDTO_whenReservationsExist() throws Exception {
+        void shouldReturn200ok_whenReservationsExist() throws Exception {
 
             given(serviceReservation.findAll()).willReturn(reservationListDTO);
 
@@ -99,7 +102,7 @@ class ReservationControllerTest {
 
 
         @Test
-        void shouldReturnListEmpty_whenReservationDoesNotExist() throws Exception {
+        void shouldReturn200ok_whenReservationDoesNotExist() throws Exception {
             given(serviceReservation.findAll()).willReturn(Collections.emptyList());
 
             mockMvc.perform(get(url)
@@ -116,7 +119,7 @@ class ReservationControllerTest {
     class GetReservation{
 
         @Test
-        void shouldReturnReservationResponseDTO_whenReservationExists() throws Exception {
+        void shouldReturn200ok_whenReservationExists() throws Exception {
 
             given(serviceReservation.findById(anyString())).willReturn(reservationResponseDTO);
 
@@ -138,17 +141,17 @@ class ReservationControllerTest {
         }
 
         @Test
-        void shouldThrowReservationNotFoundException_whenReservationDoesNotExist() throws Exception {
+        void shouldReturn404NotFound_whenReservationDoesNotExist() throws Exception {
 
-            String reservationIdInexist = "res-999";
+            String invalidId = "res-999";
 
             given(serviceReservation.findById(anyString())).willThrow(ReservationNotFoundException.class);
 
-            mockMvc.perform(get(url + "/" + reservationIdInexist)
+            mockMvc.perform(get(url + "/" + invalidId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound());
 
-            verify(serviceReservation).findById(reservationIdInexist);
+            verify(serviceReservation).findById(invalidId);
 
 
         }
@@ -160,7 +163,7 @@ class ReservationControllerTest {
     class GetReservationByUserId {
 
         @Test
-        void shouldReturnListReservationDTO_whenUserHasReservations() throws Exception {
+        void shouldReturn200ok_whenUserHasReservations() throws Exception {
             given(serviceReservation.findByUserId(userId)).willReturn(reservationListDTO);
 
             mockMvc.perform(get(url + "/user/" + userId)
@@ -173,7 +176,7 @@ class ReservationControllerTest {
         }
 
         @Test
-        void shouldReturnEmptyList_whenUserHasNoReservations() throws Exception {
+        void shouldReturn200ok_whenUserHasNoReservations() throws Exception {
 
             given(serviceReservation.findByUserId(userId)).willReturn(Collections.emptyList());
 
@@ -184,6 +187,109 @@ class ReservationControllerTest {
 
             verify(serviceReservation).findByUserId(userId);
         }
+    }
+
+    @Nested
+    class CreateReservation{
+
+        @Test
+        void shouldReturn201Created_whenReservationIsCreated() throws Exception {
+            given(serviceReservation.create(any(ReservationRequestDTO.class))).willReturn(reservationResponseDTO);
+
+            mockMvc.perform(post(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(reservationRequestDTO)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.id").value(reservationResponseDTO.getId()))
+                    .andExpect(jsonPath("$.username").value(reservationResponseDTO.getUsername()))
+                    .andExpect(jsonPath("$.hotelName").value(reservationResponseDTO.getHotelName()))
+                    .andExpect(jsonPath("$.roomNumber").value(reservationResponseDTO.getRoomNumber()))
+            ;
+
+            verify(serviceReservation).create(any(ReservationRequestDTO.class));
+
+        }
+
+        @Test
+        void shouldReturn400BadRequest_whenRequestIsInvalid() throws Exception {
+
+            reservationRequestDTO.setHotelId(null);
+
+            mockMvc.perform(post(url)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(reservationRequestDTO)))
+                    .andExpect(status().isBadRequest());
+
+            verify(serviceReservation, never()).create(any());
+        }
+
+
+    }
+
+
+    @Nested
+    class DeleteReservation{
+
+        @Test
+        void shouldReturn204NoContent_whenReservationIsDeleted() throws Exception {
+
+            mockMvc.perform(delete(url + "/" + reservationId))
+                    .andExpect(status().isNoContent());
+
+            verify(serviceReservation).deleteById(reservationId);
+
+        }
+
+        @Test
+        void shouldReturn404NotFound_whenReservationToDeleteDoesNotExist() throws Exception {
+
+            String invalidId = "res-999";
+
+            org.mockito.BDDMockito.willThrow(ReservationNotFoundException.class)
+                    .given(serviceReservation).deleteById(invalidId);
+
+            mockMvc.perform(delete(url + "/" + invalidId))
+                    .andExpect(status().isNotFound());
+
+            verify(serviceReservation).deleteById(invalidId);
+
+        }
+
+    }
+
+    @Nested
+    class UpdateState{
+
+        @Test
+        void shouldReturn200Ok_whenStateIsUpdated() throws Exception {
+
+            ReservationResponseDTO updatedResponse = ReservationResponseDTO.builder()
+                    .id(reservationId)
+                    .state(ReservationState.PAYMENT)
+                    .build();
+
+            given(serviceReservation.updateState(eq(reservationId), any(ReservationState.class)))
+                    .willReturn(updatedResponse);
+
+            mockMvc.perform(put(url + "/" + reservationId + "/state")
+                            .param("state", "PAYMENT")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.state").value("PAYMENT"));
+
+            verify(serviceReservation).updateState(reservationId, ReservationState.PAYMENT);
+        }
+
+        @Test
+        void shouldReturn400BadRequest_whenStateIsInvalid() throws Exception {
+
+            mockMvc.perform(put(url + "/" + reservationId + "/state")
+                            .param("state", "STATE_INVENTED")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+            verify(serviceReservation, never()).updateState(anyString(), any());
+        }
+
     }
 
 }
