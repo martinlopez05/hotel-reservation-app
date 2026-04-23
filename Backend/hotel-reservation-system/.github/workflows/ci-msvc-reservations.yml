@@ -2,7 +2,7 @@ name: CI - Microservice Reservations
 
 on:
   push:
-    branches: ["master", "main"]
+    branches: ["master", "main", "feat/HTL-05-integracion-ci-msvc-reservations"]
   pull_request:
     branches: [ "master", "main" ]
 
