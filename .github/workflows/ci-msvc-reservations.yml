@@ -24,4 +24,4 @@ jobs:
 
       - name: Compilar y Correr los Tests de msvc-reservations
         run: mvn clean test
-        working-directory: ./msvc-reservations
+        working-directory: ./Backend/hotel-reservation-system/msvc-reservations
