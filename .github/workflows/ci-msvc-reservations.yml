@@ -28,5 +28,5 @@ jobs:
           cache: maven
 
       - name: Compilar y Correr los Tests de msvc-reservations
-        run: mvn clean test
+        run: mvn clean verify
         working-directory: ./Backend/hotel-reservation-system/msvc-reservations
