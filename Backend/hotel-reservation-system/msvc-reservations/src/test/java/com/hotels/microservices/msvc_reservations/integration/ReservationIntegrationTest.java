@@ -32,11 +32,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -258,6 +258,164 @@ class ReservationIntegrationTest {
                     .andExpect(jsonPath("$.status").value(503));
         }
     }
+
+    @Nested
+    class GetReservationByUserId {
+
+        @Test
+        void shouldReturnOk_whenUserHasReservations() throws Exception {
+            Reservation reservation = Reservation.builder()
+                    .roomId(1L)
+                    .userId(1L)
+                    .hotelId(1L)
+                    .checkInDate(LocalDate.of(2026, 5, 1))
+                    .checkOutDate(LocalDate.of(2026, 5, 10))
+                    .build();
+            repositoryReservation.save(reservation);
+
+            given(userFeignClient.getUser(1L)).willReturn(ResponseEntity.ok(userDTO));
+            given(roomFeignClient.getRoom(1L)).willReturn(ResponseEntity.ok(roomDTO));
+            given(hotelFeignClient.getHotel(1L, false)).willReturn(ResponseEntity.ok(hotelDTO));
+
+            mockMvc.perform(get(url + "/user/" + 1 ))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(1)))
+                    .andExpect(jsonPath("$[0].userId").value(1));
+        }
+
+        @Test
+        void shouldReturnOkAndEmptyList_whenUserHasNoReservations() throws Exception {
+
+            mockMvc.perform(get(url + "/user/"+ 999))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(0)));
+        }
+
+        @Test
+        void shouldReturnServiceUnavailable_whenExternalServiceIsDown() throws Exception {
+
+            Reservation reservation = Reservation.builder()
+                    .roomId(1L)
+                    .userId(1L)
+                    .hotelId(1L)
+                    .checkInDate(LocalDate.of(2026, 5, 1))
+                    .checkOutDate(LocalDate.of(2026, 5, 10))
+                    .build();
+            repositoryReservation.save(reservation);
+
+            given(roomFeignClient.getRoom(1L)).willReturn(ResponseEntity.ok(roomDTO));
+            given(userFeignClient.getUser(1L)).willReturn(ResponseEntity.ok(userDTO));
+            given(hotelFeignClient.getHotel(1L, false))
+                    .willThrow(FeignException.ServiceUnavailable.class);
+
+
+            mockMvc.perform(get(url + "/user/" + 1))
+                    .andExpect(status().isServiceUnavailable()) // 503
+                    .andExpect(jsonPath("$.message").exists())
+                    .andExpect(jsonPath("$.status").value(503));
+        }
+    }
+
+
+    @Nested
+    class GetReservationById {
+
+        @Test
+        void shouldReturnOk_whenReservationExists() throws Exception {
+            String reservationId = "res-100";
+            Reservation reservation = Reservation.builder()
+                    .id(reservationId)
+                    .roomId(1L)
+                    .userId(1L)
+                    .hotelId(1L)
+                    .checkInDate(LocalDate.of(2026, 5, 1))
+                    .checkOutDate(LocalDate.of(2026, 5, 10))
+                    .build();
+            repositoryReservation.save(reservation);
+
+            given(userFeignClient.getUser(1L)).willReturn(ResponseEntity.ok(userDTO));
+            given(roomFeignClient.getRoom(1L)).willReturn(ResponseEntity.ok(roomDTO));
+            given(hotelFeignClient.getHotel(1L, false)).willReturn(ResponseEntity.ok(hotelDTO));
+
+            mockMvc.perform(get(url + "/" + reservationId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(reservationId))
+                    .andExpect(jsonPath("$.userId").value(1L));
+        }
+
+        @Test
+        void shouldReturnNotFound_whenReservationDoesNotExist() throws Exception {
+            String invalidId = "id-not-exist";
+
+            mockMvc.perform(get(url + "/" + invalidId))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").exists())
+                    .andExpect(jsonPath("$.status").value(404));
+        }
+
+        @Test
+        void shouldReturnServiceUnavailable_whenExternalServiceIsDown() throws Exception {
+            String reservationId = "res-200";
+            Reservation reservation = Reservation.builder()
+                    .id(reservationId)
+                    .roomId(1L)
+                    .userId(1L)
+                    .hotelId(1L)
+                    .checkInDate(LocalDate.of(2026, 5, 1))
+                    .checkOutDate(LocalDate.of(2026, 5, 10))
+                    .build();
+            repositoryReservation.save(reservation);
+
+            given(userFeignClient.getUser(1L)).willReturn(ResponseEntity.ok(userDTO));
+            given(hotelFeignClient.getHotel(1L, false)).willReturn(ResponseEntity.ok(hotelDTO));
+            given(roomFeignClient.getRoom(1L))
+                    .willThrow(FeignException.ServiceUnavailable.class);
+
+            mockMvc.perform(get(url + "/" + reservationId))
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(jsonPath("$.message").exists())
+                    .andExpect(jsonPath("$.status").value(503));
+        }
+    }
+
+    @Nested
+    class DeleteReservation{
+
+        @Test
+        void shouldReturnNoContent_whenReservationExists() throws Exception {
+
+            String reservationId = "res-200";
+            Reservation reservation = Reservation.builder()
+                    .id(reservationId)
+                    .roomId(1L)
+                    .userId(1L)
+                    .hotelId(1L)
+                    .checkInDate(LocalDate.of(2026, 5, 1))
+                    .checkOutDate(LocalDate.of(2026, 5, 10))
+                    .build();
+            repositoryReservation.save(reservation);
+
+            mockMvc.perform(delete(url + "/" + reservationId))
+                    .andExpect(status().isNoContent());
+
+            boolean exist = repositoryReservation.existsById(reservationId);
+            assertFalse(exist, "The reservation should deleted");
+
+        }
+
+        @Test
+        void shouldReturnNotFound_whenReservationDoesNotExist() throws Exception {
+            String invalidId = "id-not-exist";
+
+            mockMvc.perform(delete(url + "/" + invalidId))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").exists())
+                    .andExpect(jsonPath("$.status").value(404));
+        }
+
+    }
+
+
 
 
 }
