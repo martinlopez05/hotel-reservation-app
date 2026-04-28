@@ -9,6 +9,7 @@ import com.hotels.microservices.msvc_reservations.dto.ReservationRequestDTO;
 import com.hotels.microservices.msvc_reservations.dto.RoomDTO;
 import com.hotels.microservices.msvc_reservations.dto.UserDTO;
 import com.hotels.microservices.msvc_reservations.model.Reservation;
+import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.repository.IRepositoryReservation;
 import feign.FeignException;
 import org.junit.jupiter.api.AfterEach;
@@ -34,9 +35,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -414,6 +413,80 @@ class ReservationIntegrationTest {
         }
 
     }
+
+
+
+    @Nested
+    class UpdateReservationState {
+
+        @Test
+        void shouldReturnOk_whenStateIsUpdatedSuccessfully() throws Exception {
+            String reservationId = "res-200";
+            Reservation reservation = Reservation.builder()
+                    .id(reservationId)
+                    .roomId(1L)
+                    .userId(1L)
+                    .hotelId(1L)
+                    .checkInDate(LocalDate.of(2026, 5, 1))
+                    .checkOutDate(LocalDate.of(2026, 5, 10))
+                    .state(ReservationState.PENDING)
+                    .build();
+            repositoryReservation.save(reservation);
+
+
+            given(userFeignClient.getUser(1L)).willReturn(ResponseEntity.ok(userDTO));
+            given(roomFeignClient.getRoom(1L)).willReturn(ResponseEntity.ok(roomDTO));
+            given(hotelFeignClient.getHotel(1L, false)).willReturn(ResponseEntity.ok(hotelDTO));
+
+            String newState = "PAYMENT";
+
+            mockMvc.perform(put(url + "/" + reservationId + "/state")
+                            .param("state", newState))
+                    .andExpect(status().isOk());
+
+            Reservation updatedReservation = repositoryReservation.findById(reservationId).get();
+            assertEquals(newState, updatedReservation.getState().name());
+        }
+
+        @Test
+        void shouldReturnNotFound_whenReservationDoesNotExist() throws Exception {
+            String invalidId = "id-not-exist";
+
+            mockMvc.perform(put(url + "/" + invalidId + "/state")
+                            .param("state", "PAYMENT"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").exists())
+                    .andExpect(jsonPath("$.status").value(404));
+        }
+
+        @Test
+        void shouldReturnServiceUnavailable_whenExternalServiceIsDown() throws Exception {
+            String reservationId = "res-final-error";
+            Reservation reservation = Reservation.builder()
+                    .id(reservationId)
+                    .roomId(1L)
+                    .userId(1L)
+                    .hotelId(1L)
+                    .state(ReservationState.PENDING)
+                    .checkInDate(LocalDate.of(2026, 5, 1))
+                    .checkOutDate(LocalDate.of(2026, 5, 10))
+                    .build();
+            repositoryReservation.save(reservation);
+
+
+            given(userFeignClient.getUser(1L)).willReturn(ResponseEntity.ok(userDTO));
+            given(roomFeignClient.getRoom(1L))
+                    .willThrow(FeignException.ServiceUnavailable.class);
+
+            mockMvc.perform(put(url + "/" + reservationId + "/sta" +
+                            "te")
+                            .param("state", "PAYMENT"))
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(jsonPath("$.status").value(503));
+        }
+    }
+
+
 
 
 
