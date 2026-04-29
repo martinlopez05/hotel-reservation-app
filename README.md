@@ -36,6 +36,12 @@ La aplicación está desplegada y disponible en el siguiente enlace:
 
 ---
 
+### 🧪 Testing & Calidad (Enfoque en msvc-reservations)
+- ✅ **JUnit 5 & Mockito** → Tests unitarios robustos.
+- 🐋 **Testcontainers** → Tests de integración real con instancias de **Docker (MongoDB)**.
+- 📊 **Jacoco** → Reportes de cobertura de código.
+- 🤖 **GitHub Actions** → Pipeline de **CI (Continuous Integration)** para ejecución automática de tests en cada push.
+
 ### 🎨 Frontend
 - ⚛️ **React + TypeScript**
 - 🎨 **TailwindCSS**
@@ -58,6 +64,24 @@ El proyecto sigue una **arquitectura de microservicios distribuida**, donde cada
 Todos los servicios se registran en **Eureka Server** y se comunican entre sí mediante el **API Gateway**.
 
 ---
+
+## 💎 Microservicio Estrella: msvc-reservations
+
+El microservicio de **Reservations** ha sido diseñado como el estándar de calidad del proyecto, implementando una suite de pruebas profesional:
+
+### 🔬 Estrategia de Testing
+- **Tests Unitarios:** Cobertura total de la lógica de negocio en la capa de `Service` utilizando **Mockito**.
+- **Tests de Integración Reales:** A diferencia de los mocks tradicionales, se utiliza **Testcontainers** para levantar un contenedor real de **MongoDB** durante las pruebas. Esto garantiza que las consultas, índices y persistencia funcionen exactamente igual que en producción.
+- **Aislamiento de Perfiles:** Implementación de `application-test.properties` para neutralizar servicios externos (Eureka, RabbitMQ) durante los tests, logrando una ejecución rápida y confiable.
+
+### 🤖 Integración Continua (CI)
+Se implementó un flujo de trabajo con **GitHub Actions** que automatiza la validación del código:
+1. **Build Check:** Validación de compilación en entornos Linux.
+2. **Test Automation:** Ejecución de los 52 tests de integración contra un entorno Dockerizado en la nube.
+3. **Quality Gate:** El pipeline bloquea merges si algún test de infraestructura falla.
+
+> Este enfoque garantiza que el microservicio de Reservas sea **"Production Ready"** en todo momento.
+
 
 ## 📬 Comunicación entre Microservicios
 
