@@ -42,6 +42,8 @@ La aplicación está desplegada y disponible en el siguiente enlace:
 - 📊 **Jacoco** → Reportes de cobertura de código.
 - 🤖 **GitHub Actions** → Pipeline de **CI (Continuous Integration)** para ejecución automática de tests en cada push.
 
+---
+
 ### 🎨 Frontend
 - ⚛️ **React + TypeScript**
 - 🎨 **TailwindCSS**
