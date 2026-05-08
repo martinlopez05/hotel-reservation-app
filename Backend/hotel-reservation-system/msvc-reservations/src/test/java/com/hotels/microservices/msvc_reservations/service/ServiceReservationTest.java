@@ -88,10 +88,12 @@ class ServiceReservationTest {
                 .hotelId(reservationRequestDTO.getHotelId())
                 .userId(reservationRequestDTO.getUserId())
                 .orderNumber(1L)
+                .roomNumber(1)
+                .username("martin45630")
+                .hotelName("Hilton Buenos Aires")
                 .checkOutDate(reservationRequestDTO.getCheckOutDate())
                 .checkInDate(reservationRequestDTO.getCheckInDate())
                 .build();
-
 
         roomDTO = RoomDTO.builder()
                 .id(reservationRequestDTO.getRoomId())
@@ -111,6 +113,14 @@ class ServiceReservationTest {
         reservationResponseDTO = ReservationResponseDTO.builder()
                 .id("res-123")
                 .userId(1L)
+                .orderNumber(1L)
+                .roomNumber(1)
+                .username("martin45630")
+                .hotelName("Hilton Buenos Aires")
+                .state(ReservationState.PENDING)
+                .checkInDate(reservationRequestDTO.getCheckInDate())
+                .checkOutDate(reservationRequestDTO.getCheckOutDate())
+                .price(300.00)
                 .build();
     }
 
@@ -118,34 +128,36 @@ class ServiceReservationTest {
     class Create {
 
         @Test
-        void  shouldReturnReservationDTO_whenReservationIsCreated(){
+        void shouldReturnReservationDTO_whenReservationIsCreated() {
 
-            given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan
-                    (anyLong(),any(),any())).willReturn(false);
+            given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
+                    anyLong(), any(), any())).willReturn(false);
 
+            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
+            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
             given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
 
             given(reservationMapper.toReservation(any(ReservationRequestDTO.class))).willReturn(reservation);
-
             given(sequenceGeneratorService.generateSequence(anyString())).willReturn(1L);
-            given(repositoryReservation.save(any())).willReturn(reservation);
-            given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
-
-            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-
+            given(repositoryReservation.save(any(Reservation.class))).willReturn(reservation);
+            given(reservationMapper.toReservationResponse(any(Reservation.class))).willReturn(reservationResponseDTO);
 
             ReservationResponseDTO result = serviceReservation.create(reservationRequestDTO);
-
 
             assertNotNull(result);
 
             assertEquals("Hilton Buenos Aires", result.getHotelName());
             assertEquals("martin45630", result.getUsername());
             assertEquals(1, result.getRoomNumber());
+
             assertEquals(300.00, reservation.getPrice());
             assertEquals(ReservationState.PENDING, reservation.getState());
 
+            assertEquals("Hilton Buenos Aires", reservation.getHotelName());
+            assertEquals("martin45630", reservation.getUsername());
+            assertEquals(1, reservation.getRoomNumber());
+
+            verify(repositoryReservation).save(reservation);
         }
 
         @Test
@@ -310,24 +322,26 @@ class ServiceReservationTest {
     class FindById  {
 
         @Test
-        void shouldReturnReservationResponseDTO_whenReservationExists(){
+        void shouldReturnReservationResponseDTO_whenReservationExists() {
 
             String idExist = "res-123";
 
             given(repositoryReservation.findById(idExist)).willReturn(Optional.of(reservation));
-            given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
-            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
+            given(reservationMapper.toReservationResponse(reservation)).willReturn(reservationResponseDTO);
 
             ReservationResponseDTO result = serviceReservation.findById(idExist);
 
-            assertEquals(idExist,result.getId());
-            assertEquals(roomDTO.getRoomNumber(),result.getRoomNumber());
-            assertEquals(hotelDTO.getName(),result.getHotelName());
+            assertEquals(idExist, result.getId());
+            assertEquals(1, result.getRoomNumber());
+            assertEquals("Hilton Buenos Aires", result.getHotelName());
+            assertEquals("martin45630", result.getUsername());
+
             verify(repositoryReservation).findById(idExist);
+            verify(reservationMapper).toReservationResponse(reservation);
 
-
+            verifyNoInteractions(roomClientRest);
+            verifyNoInteractions(hotelClientRest);
+            verifyNoInteractions(userClientRest);
         }
 
         @Test
@@ -341,7 +355,9 @@ class ServiceReservationTest {
             });
 
             verify(reservationMapper,never()).toReservationResponse(any(Reservation.class));
-
+            verifyNoInteractions(roomClientRest);
+            verifyNoInteractions(hotelClientRest);
+            verifyNoInteractions(userClientRest);
         }
 
     }
@@ -350,26 +366,27 @@ class ServiceReservationTest {
     class FindAll{
 
         @Test
-        void shouldReturnListReservationResponseDTO_whenReservationsExist(){
+        void shouldReturnListReservationResponseDTO_whenReservationsExist() {
 
             List<Reservation> listReservation = List.of(reservation);
 
             given(repositoryReservation.findAll()).willReturn(listReservation);
-            given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
-            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
+            given(reservationMapper.toReservationResponse(reservation)).willReturn(reservationResponseDTO);
 
             List<ReservationResponseDTO> result = serviceReservation.findAll();
 
             assertNotNull(result);
-            assertEquals(1,result.size());
-            assertEquals(hotelDTO.getName(),result.get(0).getHotelName());
-            assertEquals(roomDTO.getRoomNumber(),result.get(0).getRoomNumber());
-            assertEquals(userDTO.getUsername(),result.get(0).getUsername());
+            assertEquals(1, result.size());
+            assertEquals("Hilton Buenos Aires", result.get(0).getHotelName());
+            assertEquals(1, result.get(0).getRoomNumber());
+            assertEquals("martin45630", result.get(0).getUsername());
 
             verify(repositoryReservation).findAll();
+            verify(reservationMapper).toReservationResponse(reservation);
 
+            verifyNoInteractions(roomClientRest);
+            verifyNoInteractions(hotelClientRest);
+            verifyNoInteractions(userClientRest);
         }
 
 
@@ -382,6 +399,9 @@ class ServiceReservationTest {
             assertNotNull(result);
             assertTrue(result.isEmpty());
             verify(reservationMapper, never()).toReservationResponse(any());
+            verifyNoInteractions(roomClientRest);
+            verifyNoInteractions(hotelClientRest);
+            verifyNoInteractions(userClientRest);
         }
 
 
@@ -391,29 +411,30 @@ class ServiceReservationTest {
     class FindByUserId{
 
         @Test
-        void shouldReturnListReservationResponseDTO_whenReservationExist(){
+        void shouldReturnListReservationResponseDTO_whenReservationExist() {
 
             List<Reservation> listReservation = List.of(reservation);
 
             Long idUser = 1L;
 
             given(repositoryReservation.findByUserId(idUser)).willReturn(listReservation);
-            given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
-            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
+            given(reservationMapper.toReservationResponse(reservation)).willReturn(reservationResponseDTO);
 
             List<ReservationResponseDTO> result = serviceReservation.findByUserId(idUser);
 
             assertNotNull(result);
-            assertEquals(1,result.size());
-            assertEquals(userDTO.getId(),result.get(0).getUserId());
-            assertEquals(userDTO.getUsername(),result.get(0).getUsername());
-            assertEquals(hotelDTO.getName(),result.get(0).getHotelName());
-            assertEquals(roomDTO.getRoomNumber(),result.get(0).getRoomNumber());
+            assertEquals(1, result.size());
+            assertEquals(idUser, result.get(0).getUserId());
+            assertEquals("martin45630", result.get(0).getUsername());
+            assertEquals("Hilton Buenos Aires", result.get(0).getHotelName());
+            assertEquals(1, result.get(0).getRoomNumber());
 
             verify(repositoryReservation).findByUserId(idUser);
             verify(reservationMapper).toReservationResponse(reservation);
+
+            verifyNoInteractions(roomClientRest);
+            verifyNoInteractions(hotelClientRest);
+            verifyNoInteractions(userClientRest);
         }
 
         @Test
@@ -431,6 +452,9 @@ class ServiceReservationTest {
             verify(repositoryReservation).findByUserId(idUser);
 
             verify(reservationMapper, never()).toReservationResponse(any());
+            verifyNoInteractions(roomClientRest);
+            verifyNoInteractions(hotelClientRest);
+            verifyNoInteractions(userClientRest);
         }
     }
 
@@ -472,25 +496,36 @@ class ServiceReservationTest {
     class UpdateState{
 
         @Test
-        void shouldReturnReservationResponseDTO_whenReservationExists(){
+        void shouldReturnReservationResponseDTO_whenReservationExists() {
 
             String idExist = "res-123";
 
+            ReservationResponseDTO updatedResponseDTO = ReservationResponseDTO.builder()
+                    .id("res-123")
+                    .userId(1L)
+                    .hotelName("Hilton Buenos Aires")
+                    .username("martin45630")
+                    .roomNumber(1)
+                    .state(ReservationState.PAYMENT)
+                    .build();
+
             given(repositoryReservation.findById(idExist)).willReturn(Optional.of(reservation));
             given(repositoryReservation.save(reservation)).willReturn(reservation);
-            given(reservationMapper.toReservationResponse(reservation)).willReturn(reservationResponseDTO);
-            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
+            given(reservationMapper.toReservationResponse(reservation)).willReturn(updatedResponseDTO);
 
-            ReservationResponseDTO result = serviceReservation.updateState(idExist,ReservationState.PAYMENT);
+            ReservationResponseDTO result = serviceReservation.updateState(idExist, ReservationState.PAYMENT);
 
             assertNotNull(result);
-
             assertEquals(ReservationState.PAYMENT, reservation.getState());
+            assertEquals(ReservationState.PAYMENT, result.getState());
+
             verify(repositoryReservation).findById(idExist);
             verify(repositoryReservation).save(reservation);
+            verify(reservationMapper).toReservationResponse(reservation);
 
+            verifyNoInteractions(roomClientRest);
+            verifyNoInteractions(hotelClientRest);
+            verifyNoInteractions(userClientRest);
         }
 
         @Test
@@ -506,6 +541,9 @@ class ServiceReservationTest {
 
             verify(repositoryReservation).findById(idNotExist);
             verify(repositoryReservation,never()).save(reservation);
+            verifyNoInteractions(roomClientRest);
+            verifyNoInteractions(hotelClientRest);
+            verifyNoInteractions(userClientRest);
 
         }
 
