@@ -22,7 +22,6 @@ public class ReservationResponseDTO {
     private Long orderNumber;
     private Long userId;
 
-    @Enumerated(EnumType.STRING)
     private ReservationState state;
 
     private String username;

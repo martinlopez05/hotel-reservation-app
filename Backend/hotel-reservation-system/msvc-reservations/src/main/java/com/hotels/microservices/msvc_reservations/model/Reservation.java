@@ -27,6 +27,9 @@ public class Reservation {
     private Long hotelId;
     private Long userId;
     private Long orderNumber;
+    private int roomNumber;
+    private String username;
+    private String hotelName;
 
     @Enumerated(EnumType.STRING)
     private ReservationState state;

@@ -55,28 +55,21 @@ public class ServiceReservation implements IServiceReservation{
         reservation.setPrice(roomDTO.getPricePerNight() * days);
         reservation.setOrderNumber(sequenceGenerator.generateSequence("reservationOrder"));
         reservation.setState(ReservationState.PENDING);
+        reservation.setUsername(userDTO.getUsername());
+        reservation.setHotelName(hotelDTO.getName());
+        reservation.setRoomNumber(roomDTO.getRoomNumber());
 
-        repositoryReservation.save(reservation);
+        Reservation savedReservation = repositoryReservation.save(reservation);
 
-        ReservationResponseDTO reservationResponseDTO = reservationMapper.toReservationResponse(reservation);
-        reservationResponseDTO.setRoomNumber(roomDTO.getRoomNumber());
-        reservationResponseDTO.setHotelName(hotelDTO.getName());
-        reservationResponseDTO.setUsername(userDTO.getUsername());
-
-        return reservationResponseDTO;
+        return reservationMapper.toReservationResponse(savedReservation);
     }
 
     @Override
     public List<ReservationResponseDTO> findAll() {
         return repositoryReservation.findAll().stream()
-                .map(r -> {
-                    ReservationResponseDTO dto = reservationMapper.toReservationResponse(r);
-                    enrichReservationDTO(dto, r);
-                    return dto;
-                }).toList();
+                .map(reservationMapper::toReservationResponse).toList();
 
     }
-
 
 
     @Override
@@ -84,21 +77,13 @@ public class ServiceReservation implements IServiceReservation{
         Reservation reservation = repositoryReservation.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("Reservation " + id + " not found"));
 
-        ReservationResponseDTO dto = reservationMapper.toReservationResponse(reservation);
-
-        enrichReservationDTO(dto,reservation);
-
-        return dto;
+        return reservationMapper.toReservationResponse(reservation);
     }
 
     @Override
     public List<ReservationResponseDTO> findByUserId(Long userId) {
         return repositoryReservation.findByUserId(userId).stream()
-                .map(r -> {
-                    ReservationResponseDTO dto = reservationMapper.toReservationResponse(r);
-                    enrichReservationDTO(dto,r);
-                    return dto;
-                })
+                .map(reservationMapper::toReservationResponse)
                 .toList();
     }
 
@@ -117,23 +102,13 @@ public class ServiceReservation implements IServiceReservation{
                 .orElseThrow(() -> new ReservationNotFoundException("Reservation " + reservationId + " not found"));
 
         reservation.setState(newState);
-        repositoryReservation.save(reservation);
+        Reservation savedReservation = repositoryReservation.save(reservation);
 
-        ReservationResponseDTO dto = reservationMapper.toReservationResponse(reservation);
-        enrichReservationDTO(dto, reservation);
-        return dto;
+        return reservationMapper.toReservationResponse(savedReservation);
+
     }
 
 
-    private void enrichReservationDTO(ReservationResponseDTO dto, Reservation reservation) {
-        RoomDTO roomDTO = getRoomData(reservation.getRoomId());
-        HotelDTO hotelDTO = getHotelData(reservation.getHotelId());
-        UserDTO userDTO = getUserData(reservation.getUserId());
-
-        dto.setRoomNumber(roomDTO.getRoomNumber());
-        dto.setHotelName(hotelDTO.getName());
-        dto.setUsername(userDTO.getUsername());
-    }
 
     private void validateRoomAvailability(ReservationRequestDTO dto){
         boolean isReserved = repositoryReservation
@@ -192,6 +167,5 @@ public class ServiceReservation implements IServiceReservation{
             throw new ExternalServiceException("The User service is currently unavailable.");
         }
     }
-
 
 }
