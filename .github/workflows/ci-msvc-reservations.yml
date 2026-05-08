@@ -2,7 +2,12 @@ name: CI - Microservice Reservations
 
 on:
   push:
-    branches: ["master", "main", "feat/HTL-05-integracion-ci-msvc-reservations"]
+    branches:
+      - main
+      - master
+      - "feat/**"
+      - "test/**"
+      - "fix/**"
   pull_request:
     branches: [ "master", "main" ]
 
@@ -23,5 +28,5 @@ jobs:
           cache: maven
 
       - name: Compilar y Correr los Tests de msvc-reservations
-        run: mvn clean test
+        run: mvn clean verify
         working-directory: ./Backend/hotel-reservation-system/msvc-reservations
