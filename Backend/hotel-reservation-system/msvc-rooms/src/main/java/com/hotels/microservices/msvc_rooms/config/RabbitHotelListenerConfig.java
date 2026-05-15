@@ -1,11 +1,11 @@
-package com.hotels.microservices.msvc_reservations.config;
+package com.hotels.microservices.msvc_rooms.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabbitHotelListernerConfig {
+public class RabbitHotelListenerConfig {
     public static final String EXCHANGE =
             "hotel.exchange";
 
