@@ -10,6 +10,9 @@ import com.hotels.microservices.msvc_reservations.model.Reservation;
 import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.repository.IRepositoryReservation;
 import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import jakarta.validation.constraints.DecimalMax;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,20 +25,16 @@ public class ServiceReservation implements IServiceReservation{
 
     private final IRepositoryReservation repositoryReservation;
 
-
     private final IReservationMapper reservationMapper;
-
-
-    private final RoomClientRest roomClientRest;
-
-
-    private final HotelClientRest hotelClientRest;
-
 
     private final SequenceGeneratorService sequenceGenerator;
 
 
-    private final UserClientRest userClientRest;
+    private final UserIntegrationService userIntegrationService;
+
+    private final HotelIntegrationService hotelIntegrationService;
+
+    private final RoomIntegrationService roomIntegrationService;
 
 
     @Override
@@ -43,9 +42,9 @@ public class ServiceReservation implements IServiceReservation{
 
         long days = sanitizeDatesAndCalculateDays(reservationRequestDTO);
 
-        UserDTO userDTO = getUserData(reservationRequestDTO.getUserId());
-        HotelDTO hotelDTO = getHotelData(reservationRequestDTO.getHotelId());
-        RoomDTO roomDTO = getRoomData(reservationRequestDTO.getRoomId());
+        UserDTO userDTO = userIntegrationService.getUserData(reservationRequestDTO.getUserId());
+        HotelDTO hotelDTO = hotelIntegrationService.getHotelData(reservationRequestDTO.getHotelId());
+        RoomDTO roomDTO = roomIntegrationService.getRoomData(reservationRequestDTO.getRoomId());
 
 
         validateRoomAvailability(reservationRequestDTO);
@@ -132,40 +131,5 @@ public class ServiceReservation implements IServiceReservation{
         return days == 0 ? 1 : days;
     }
 
-    private RoomDTO getRoomData(Long roomId) {
-        try {
-            return roomClientRest.getRoom(roomId).getBody();
-
-        } catch (FeignException.NotFound e) {
-            throw new RoomNotFoundException("The room with ID " + roomId + " does not exist.");
-
-        } catch (FeignException e) {
-            throw new ExternalServiceException("The Room service is currently unavailable.");
-        }
-    }
-
-    private HotelDTO getHotelData(Long hotelId) {
-        try {
-            return hotelClientRest.getHotel(hotelId,false).getBody();
-
-        } catch (FeignException.NotFound e) {
-            throw new HotelNotFoundException("The hotel with ID " + hotelId + " does not exist.");
-
-        } catch (FeignException e) {
-            throw new ExternalServiceException("The Hotel service is currently unavailable.");
-        }
-    }
-
-    private UserDTO getUserData(Long userId) {
-        try {
-            return userClientRest.getUser(userId).getBody();
-
-        } catch (FeignException.NotFound e) {
-            throw new UserNotFoundException("The user with ID " + userId + " does not exist.");
-
-        } catch (FeignException e) {
-            throw new ExternalServiceException("The User service is currently unavailable.");
-        }
-    }
 
 }

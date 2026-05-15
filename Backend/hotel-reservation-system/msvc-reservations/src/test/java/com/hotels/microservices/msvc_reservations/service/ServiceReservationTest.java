@@ -1,8 +1,5 @@
 package com.hotels.microservices.msvc_reservations.service;
 
-import com.hotels.microservices.msvc_reservations.client.HotelClientRest;
-import com.hotels.microservices.msvc_reservations.client.RoomClientRest;
-import com.hotels.microservices.msvc_reservations.client.UserClientRest;
 import com.hotels.microservices.msvc_reservations.dto.*;
 import com.hotels.microservices.msvc_reservations.exception.*;
 import com.hotels.microservices.msvc_reservations.mapper.IReservationMapper;
@@ -38,13 +35,11 @@ class ServiceReservationTest {
     private IRepositoryReservation repositoryReservation;
 
     @Mock
-    private HotelClientRest hotelClientRest;
-
+    private UserIntegrationService userIntegrationService;
     @Mock
-    private RoomClientRest roomClientRest;
-
+    private HotelIntegrationService hotelIntegrationService;
     @Mock
-    private UserClientRest userClientRest;
+    private RoomIntegrationService roomIntegrationService;
 
     @Mock
     private IReservationMapper reservationMapper;
@@ -133,9 +128,9 @@ class ServiceReservationTest {
             given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
                     anyLong(), any(), any())).willReturn(false);
 
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
+            given(userIntegrationService.getUserData(anyLong())).willReturn(userDTO);
+            given(hotelIntegrationService.getHotelData(anyLong())).willReturn(hotelDTO);
+            given(roomIntegrationService.getRoomData(anyLong())).willReturn(roomDTO);
 
             given(reservationMapper.toReservation(any(ReservationRequestDTO.class))).willReturn(reservation);
             given(sequenceGeneratorService.generateSequence(anyString())).willReturn(1L);
@@ -168,13 +163,13 @@ class ServiceReservationTest {
             given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
                     anyLong(), any(), any())).willReturn(false);
 
-            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
+            given(roomIntegrationService.getRoomData(anyLong())).willReturn(roomDTO);
             given(reservationMapper.toReservation(any(ReservationRequestDTO.class))).willReturn(reservation);
             given(sequenceGeneratorService.generateSequence(anyString())).willReturn(1L);
             given(repositoryReservation.save(any())).willReturn(reservation);
             given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
-            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
+            given(hotelIntegrationService.getHotelData(anyLong())).willReturn(hotelDTO);
+            given(userIntegrationService.getUserData(anyLong())).willReturn(userDTO);
 
             serviceReservation.create(reservationRequestDTO);
 
@@ -182,21 +177,21 @@ class ServiceReservationTest {
         }
 
         @Test
-        void  shouldThrowRoomIsReservedException_whenRoomIsReserved(){
+        void shouldThrowRoomIsReservedException_whenRoomIsReserved() {
 
             given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan
-                    (anyLong(),any(),any())).willReturn(true);
+                    (anyLong(), any(), any())).willReturn(true);
 
-            given(hotelClientRest.getHotel(anyLong(),eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
+            given(hotelIntegrationService.getHotelData(anyLong())).willReturn(hotelDTO);
+            given(userIntegrationService.getUserData(anyLong())).willReturn(userDTO);
+            given(roomIntegrationService.getRoomData(anyLong())).willReturn(roomDTO);
 
             assertThrows(RoomIsReservedException.class, () -> {
                 serviceReservation.create(reservationRequestDTO);
             });
 
-            verify(roomClientRest).getRoom(reservationRequestDTO.getRoomId());
-            verify(reservationMapper,never()).toReservation(reservationRequestDTO);
+            verify(roomIntegrationService).getRoomData(reservationRequestDTO.getRoomId());
+            verify(reservationMapper, never()).toReservation(reservationRequestDTO);
 
         }
 
@@ -209,13 +204,13 @@ class ServiceReservationTest {
             given(repositoryReservation.existsByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
                     anyLong(), any(), any())).willReturn(false);
 
-            given(roomClientRest.getRoom(anyLong())).willReturn(ResponseEntity.ok(roomDTO));
+            given(roomIntegrationService.getRoomData(anyLong())).willReturn(roomDTO);
             given(reservationMapper.toReservation(any(ReservationRequestDTO.class))).willReturn(reservation);
             given(sequenceGeneratorService.generateSequence(anyString())).willReturn(1L);
             given(repositoryReservation.save(any())).willReturn(reservation);
             given(reservationMapper.toReservationResponse(any())).willReturn(reservationResponseDTO);
-            given(hotelClientRest.getHotel(anyLong(), eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
+            given(hotelIntegrationService.getHotelData(anyLong())).willReturn(hotelDTO);
+            given(userIntegrationService.getUserData(anyLong())).willReturn(userDTO);
 
             serviceReservation.create(reservationRequestDTO);
 
@@ -225,11 +220,9 @@ class ServiceReservationTest {
 
         @Test
         void shouldThrowRoomNotFoundException_whenRoomClientReturns404() {
-
-            FeignException.NotFound feignNotFound = mock(FeignException.NotFound.class);
-            given(roomClientRest.getRoom(anyLong())).willThrow(feignNotFound);
-            given(hotelClientRest.getHotel(anyLong(),eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
+            given(roomIntegrationService.getRoomData(anyLong())).willThrow(new RoomNotFoundException("Room not found"));
+            given(hotelIntegrationService.getHotelData(anyLong())).willReturn(hotelDTO);
+            given(userIntegrationService.getUserData(anyLong())).willReturn(userDTO);
 
             assertThrows(RoomNotFoundException.class, () -> {
                 serviceReservation.create(reservationRequestDTO);
@@ -240,12 +233,9 @@ class ServiceReservationTest {
 
         @Test
         void shouldThrowExternalServiceException_whenRoomClientIsDown() {
-
-            FeignException feignError = mock(FeignException.class);
-            given(roomClientRest.getRoom(anyLong())).willThrow(feignError);
-            given(hotelClientRest.getHotel(anyLong(),eq(false))).willReturn(ResponseEntity.ok(hotelDTO));
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-
+            given(roomIntegrationService.getRoomData(anyLong())).willThrow(new ExternalServiceException("Service down"));
+            given(hotelIntegrationService.getHotelData(anyLong())).willReturn(hotelDTO);
+            given(userIntegrationService.getUserData(anyLong())).willReturn(userDTO);
 
             assertThrows(ExternalServiceException.class, () -> {
                 serviceReservation.create(reservationRequestDTO);
@@ -256,26 +246,20 @@ class ServiceReservationTest {
 
         @Test
         void shouldThrowExternalServiceException_whenHotelClientIsDown() {
-
-            FeignException feignError = mock(FeignException.class);
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(hotelClientRest.getHotel(anyLong(), eq(false))).willThrow(feignError);
-
+            given(userIntegrationService.getUserData(anyLong())).willReturn(userDTO);
+            given(hotelIntegrationService.getHotelData(anyLong())).willThrow(new ExternalServiceException("Service down"));
 
             assertThrows(ExternalServiceException.class, () -> {
                 serviceReservation.create(reservationRequestDTO);
             });
 
             verify(repositoryReservation, never()).save(any());
-            verify(roomClientRest,never()).getRoom(reservationRequestDTO.getRoomId());
+            verify(roomIntegrationService, never()).getRoomData(anyLong());
         }
 
         @Test
         void shouldThrowExternalServiceException_whenUserClientIsDown() {
-
-            FeignException feignError = mock(FeignException.class);
-            given(userClientRest.getUser(anyLong())).willThrow(feignError);
-
+            given(userIntegrationService.getUserData(anyLong())).willThrow(new ExternalServiceException("Service down"));
 
             assertThrows(ExternalServiceException.class, () -> {
                 serviceReservation.create(reservationRequestDTO);
@@ -286,35 +270,29 @@ class ServiceReservationTest {
 
         @Test
         void shouldThrowUserNotFoundException_whenUserClientReturns404() {
-
-            FeignException.NotFound feignNotFound = mock(FeignException.NotFound.class);
-            given(userClientRest.getUser(anyLong())).willThrow(feignNotFound);
+            given(userIntegrationService.getUserData(anyLong())).willThrow(new UserNotFoundException("User not found"));
 
             assertThrows(UserNotFoundException.class, () -> {
                 serviceReservation.create(reservationRequestDTO);
             });
 
             verify(repositoryReservation, never()).save(any());
-            verify(hotelClientRest,never()).getHotel(reservationRequestDTO.getHotelId(),false);
-            verify(roomClientRest,never()).getRoom(reservationRequestDTO.getRoomId());
+            verify(hotelIntegrationService, never()).getHotelData(anyLong());
+            verify(roomIntegrationService, never()).getRoomData(anyLong());
         }
 
         @Test
         void shouldThrowHotelNotFoundException_whenHotelClientReturns404() {
-
-            FeignException.NotFound feignNotFound = mock(FeignException.NotFound.class);
-            given(userClientRest.getUser(anyLong())).willReturn(ResponseEntity.ok(userDTO));
-            given(hotelClientRest.getHotel(anyLong(),eq(false))).willThrow(feignNotFound);
+            given(userIntegrationService.getUserData(anyLong())).willReturn(userDTO);
+            given(hotelIntegrationService.getHotelData(anyLong())).willThrow(new HotelNotFoundException("Hotel not found"));
 
             assertThrows(HotelNotFoundException.class, () -> {
                 serviceReservation.create(reservationRequestDTO);
             });
 
             verify(repositoryReservation, never()).save(any());
-            verify(roomClientRest,never()).getRoom(reservationRequestDTO.getRoomId());
+            verify(roomIntegrationService, never()).getRoomData(anyLong());
         }
-
-
 
     }
 
@@ -339,9 +317,9 @@ class ServiceReservationTest {
             verify(repositoryReservation).findById(idExist);
             verify(reservationMapper).toReservationResponse(reservation);
 
-            verifyNoInteractions(roomClientRest);
-            verifyNoInteractions(hotelClientRest);
-            verifyNoInteractions(userClientRest);
+            verifyNoInteractions(roomIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(userIntegrationService);
         }
 
         @Test
@@ -355,9 +333,9 @@ class ServiceReservationTest {
             });
 
             verify(reservationMapper,never()).toReservationResponse(any(Reservation.class));
-            verifyNoInteractions(roomClientRest);
-            verifyNoInteractions(hotelClientRest);
-            verifyNoInteractions(userClientRest);
+            verifyNoInteractions(roomIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(userIntegrationService);
         }
 
     }
@@ -384,9 +362,9 @@ class ServiceReservationTest {
             verify(repositoryReservation).findAll();
             verify(reservationMapper).toReservationResponse(reservation);
 
-            verifyNoInteractions(roomClientRest);
-            verifyNoInteractions(hotelClientRest);
-            verifyNoInteractions(userClientRest);
+            verifyNoInteractions(roomIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(userIntegrationService);
         }
 
 
@@ -399,9 +377,9 @@ class ServiceReservationTest {
             assertNotNull(result);
             assertTrue(result.isEmpty());
             verify(reservationMapper, never()).toReservationResponse(any());
-            verifyNoInteractions(roomClientRest);
-            verifyNoInteractions(hotelClientRest);
-            verifyNoInteractions(userClientRest);
+            verifyNoInteractions(roomIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(userIntegrationService);
         }
 
 
@@ -432,9 +410,9 @@ class ServiceReservationTest {
             verify(repositoryReservation).findByUserId(idUser);
             verify(reservationMapper).toReservationResponse(reservation);
 
-            verifyNoInteractions(roomClientRest);
-            verifyNoInteractions(hotelClientRest);
-            verifyNoInteractions(userClientRest);
+            verifyNoInteractions(roomIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(userIntegrationService);
         }
 
         @Test
@@ -452,9 +430,9 @@ class ServiceReservationTest {
             verify(repositoryReservation).findByUserId(idUser);
 
             verify(reservationMapper, never()).toReservationResponse(any());
-            verifyNoInteractions(roomClientRest);
-            verifyNoInteractions(hotelClientRest);
-            verifyNoInteractions(userClientRest);
+            verifyNoInteractions(roomIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(userIntegrationService);
         }
     }
 
@@ -523,9 +501,9 @@ class ServiceReservationTest {
             verify(repositoryReservation).save(reservation);
             verify(reservationMapper).toReservationResponse(reservation);
 
-            verifyNoInteractions(roomClientRest);
-            verifyNoInteractions(hotelClientRest);
-            verifyNoInteractions(userClientRest);
+            verifyNoInteractions(roomIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(userIntegrationService);
         }
 
         @Test
@@ -541,9 +519,9 @@ class ServiceReservationTest {
 
             verify(repositoryReservation).findById(idNotExist);
             verify(repositoryReservation,never()).save(reservation);
-            verifyNoInteractions(roomClientRest);
-            verifyNoInteractions(hotelClientRest);
-            verifyNoInteractions(userClientRest);
+            verifyNoInteractions(roomIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(userIntegrationService);
 
         }
 

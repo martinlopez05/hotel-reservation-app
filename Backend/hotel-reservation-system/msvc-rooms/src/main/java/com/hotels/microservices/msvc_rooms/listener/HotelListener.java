@@ -1,6 +1,6 @@
 package com.hotels.microservices.msvc_rooms.listener;
 
-import com.hotels.microservices.msvc_rooms.config.RabbitHotelListernerConfig;
+import com.hotels.microservices.msvc_rooms.config.RabbitHotelListenerConfig;
 import com.hotels.microservices.msvc_rooms.repository.IRepositoryRoom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ public class HotelListener {
     @Autowired
     private IRepositoryRoom repositoryRoom;
 
-    @RabbitListener(queues = RabbitHotelListernerConfig.QUEUE)
+    @RabbitListener(queues = RabbitHotelListenerConfig.QUEUE)
     public void handleHotelDeleted(Long hotelId) {
         repositoryRoom.findByHotelId(hotelId);
     }
