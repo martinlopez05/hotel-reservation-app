@@ -84,8 +84,6 @@ Para evitar fallos en cascada dentro del ecosistema distribuido, se aisló la co
 
 ### 🤖 Integración Continua (CI)
 Se estructuró un flujo de trabajo con **GitHub Actions** que compila y ejecuta de manera automatizada los **50 tests del microservicio** en un entorno Linux aislado en cada Push o Pull Request, garantizando que la rama principal permanezca siempre *Production Ready*.
-> Este enfoque garantiza que el microservicio de Reservas sea **"Production Ready"** en todo momento.
-
 
 ## 📬 Comunicación entre Microservicios
 
@@ -173,7 +171,7 @@ El sistema utiliza **Spring Security + JWT (JSON Web Tokens)** para la autentica
 - ✅ Integración con múltiples bases de datos  
 - ✅ Balanceo dinámico y descubrimiento de servicios (Eureka)  
 - ✅ API Gateway con validación centralizada  
-- 🛠️ Dockerización completa en progreso  
+- ✅ Ecosistema completamente contenedorizado con Docker y Docker Compose
 
 ---
 
