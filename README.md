@@ -69,19 +69,21 @@ Todos los servicios se registran en **Eureka Server** y se comunican entre sí m
 
 ## 💎 Microservicio Estrella: msvc-reservations
 
-El microservicio de **Reservations** ha sido diseñado como el estándar de calidad del proyecto, implementando una suite de pruebas profesional:
+El microservicio de **Reservations** ha sido diseñado como el estándar de calidad y robustez del proyecto, implementando una arquitectura tolerante a fallos y una suite de pruebas profesional:
 
-### 🔬 Estrategia de Testing
-- **Tests Unitarios:** Cobertura total de la lógica de negocio en la capa de `Service` utilizando **Mockito**.
-- **Tests de Integración Reales:** A diferencia de los mocks tradicionales, se utiliza **Testcontainers** para levantar un contenedor real de **MongoDB** durante las pruebas. Esto garantiza que las consultas, índices y persistencia funcionen exactamente igual que en producción.
-- **Aislamiento de Perfiles:** Implementación de `application-test.properties` para neutralizar servicios externos (Eureka, RabbitMQ) durante los tests, logrando una ejecución rápida y confiable.
+### 🛡️ Tolerancia a Fallos y Alta Disponibilidad (Resilience4j)
+Para evitar fallos en cascada dentro del ecosistema distribuido, se aisló la comunicación con los clientes Feign mediante una capa de **Servicios de Integración** decorados con patrones de resiliencia:
+* **Circuit Breaker:** Configurado con una ventana deslizante de 20 llamadas y un umbral de error del 50%. Si un servicio externo cae, el circuito se abre durante 60 segundos protegiendo la integridad del sistema.
+* **Retry Pattern:** Ante fallos efímeros de red, implementa hasta 3 reintentos automáticos con un mecanismo de retroceso exponencial (`exponentialBackoffMultiplier=2`) para mitigar la sobrecarga.
+* **Orden de Aspectos:** Se configuró un orden estricto de precedencia (`Circuit Breaker` -> `Retry`) para optimizar el ciclo de vida de los requests concurrentes.
+
+### 🔬 Estrategia de Testing Automatizado
+* **Tests Unitarios:** Cobertura total de la lógica de negocio en la capa de servicios mediante `Mockito`, simulando con precisión los escenarios de éxito y el lanzamiento de excepciones controladas de negocio (`HotelNotFoundException`, etc.).
+* **Tests de Integración Reales:** Utiliza **Testcontainers** para levantar una instancia real de **MongoDB en un contenedor Docker** durante la fase de pruebas, garantizando que el comportamiento de persistencia sea idéntico al de producción.
+* **Aislamiento de Perfiles:** Implementación de `application-test.properties` para neutralizar el tráfico de red de Eureka, RabbitMQ y los aspectos de infraestructura durante los tests, logrando ejecuciones deterministas y ultrarrápidas.
 
 ### 🤖 Integración Continua (CI)
-Se implementó un flujo de trabajo con **GitHub Actions** que automatiza la validación del código:
-1. **Build Check:** Validación de compilación en entornos Linux.
-2. **Test Automation:** Ejecución de los 52 tests de integración contra un entorno Dockerizado en la nube.
-3. **Quality Gate:** El pipeline bloquea merges si algún test de infraestructura falla.
-
+Se estructuró un flujo de trabajo con **GitHub Actions** que compila y ejecuta de manera automatizada los **50 tests del microservicio** en un entorno Linux aislado en cada Push o Pull Request, garantizando que la rama principal permanezca siempre *Production Ready*.
 > Este enfoque garantiza que el microservicio de Reservas sea **"Production Ready"** en todo momento.
 
 
