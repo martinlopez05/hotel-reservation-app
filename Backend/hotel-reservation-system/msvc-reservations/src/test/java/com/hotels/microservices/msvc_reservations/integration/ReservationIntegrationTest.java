@@ -8,9 +8,13 @@ import com.hotels.microservices.msvc_reservations.dto.HotelDTO;
 import com.hotels.microservices.msvc_reservations.dto.ReservationRequestDTO;
 import com.hotels.microservices.msvc_reservations.dto.RoomDTO;
 import com.hotels.microservices.msvc_reservations.dto.UserDTO;
+import com.hotels.microservices.msvc_reservations.exception.UserNotFoundException;
 import com.hotels.microservices.msvc_reservations.model.Reservation;
 import com.hotels.microservices.msvc_reservations.model.ReservationState;
 import com.hotels.microservices.msvc_reservations.repository.IRepositoryReservation;
+import com.hotels.microservices.msvc_reservations.service.HotelIntegrationService;
+import com.hotels.microservices.msvc_reservations.service.RoomIntegrationService;
+import com.hotels.microservices.msvc_reservations.service.UserIntegrationService;
 import feign.FeignException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,13 +65,13 @@ class ReservationIntegrationTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private UserClientRest userFeignClient;
+    private UserIntegrationService userIntegrationService;
 
     @MockitoBean
-    private HotelClientRest hotelFeignClient;
+    private HotelIntegrationService hotelIntegrationService;
 
     @MockitoBean
-    private RoomClientRest roomFeignClient;
+    private RoomIntegrationService roomIntegrationService;
 
     private static final String url = "/reservations";
 
@@ -152,9 +156,9 @@ class ReservationIntegrationTest {
 
         @Test
         void shouldReturnCreated_whenReservationIsCreated() throws Exception {
-            given(userFeignClient.getUser(1L)).willReturn(ResponseEntity.ok(userDTO));
-            given(hotelFeignClient.getHotel(1L, false)).willReturn(ResponseEntity.ok(hotelDTO));
-            given(roomFeignClient.getRoom(1L)).willReturn(ResponseEntity.ok(roomDTO));
+            given(userIntegrationService.getUserData(1L)).willReturn(userDTO);
+            given(hotelIntegrationService.getHotelData(1L)).willReturn(hotelDTO);
+            given(roomIntegrationService.getRoomData(1L)).willReturn(roomDTO);
 
             ReservationRequestDTO requestDTO = validRequestDTO(1L);
 
@@ -204,7 +208,8 @@ class ReservationIntegrationTest {
         void shouldReturnNotFound_whenUserDoesNotExist() throws Exception {
             FeignException.NotFound feignNotFound = mock(FeignException.NotFound.class);
 
-            given(userFeignClient.getUser(999L)).willThrow(feignNotFound);
+            given(userIntegrationService.getUserData(999L))
+                    .willThrow(new UserNotFoundException("The user with ID 999 does not exist."));
 
             ReservationRequestDTO requestDTO = validRequestDTO(999L);
 
@@ -228,9 +233,9 @@ class ReservationIntegrationTest {
 
             ReservationRequestDTO requestDTO = validRequestDTO(1L);
 
-            given(userFeignClient.getUser(1L)).willReturn(ResponseEntity.ok(userDTO));
-            given(hotelFeignClient.getHotel(1L, false)).willReturn(ResponseEntity.ok(hotelDTO));
-            given(roomFeignClient.getRoom(1L)).willReturn(ResponseEntity.ok(roomDTO));
+            given(userIntegrationService.getUserData(1L)).willReturn(userDTO);
+            given(hotelIntegrationService.getHotelData(1L)).willReturn(hotelDTO);
+            given(roomIntegrationService.getRoomData(1L)).willReturn(roomDTO);
 
             mockMvc.perform(post(url)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -258,9 +263,7 @@ class ReservationIntegrationTest {
                     .andExpect(jsonPath("$[0].username").value("martin"))
                     .andExpect(jsonPath("$[0].roomNumber").value(12));
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+
         }
 
         @Test
@@ -269,9 +272,9 @@ class ReservationIntegrationTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(0)));
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
 
         @Test
@@ -287,9 +290,9 @@ class ReservationIntegrationTest {
                     .andExpect(jsonPath("$[0].username").value("martin"))
                     .andExpect(jsonPath("$[0].roomNumber").value(12));
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
     }
 
@@ -310,9 +313,9 @@ class ReservationIntegrationTest {
                     .andExpect(jsonPath("$[0].username").value("martin"))
                     .andExpect(jsonPath("$[0].roomNumber").value(12));
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
 
         @Test
@@ -321,9 +324,9 @@ class ReservationIntegrationTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(0)));
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
 
         @Test
@@ -340,9 +343,9 @@ class ReservationIntegrationTest {
                     .andExpect(jsonPath("$[0].username").value("martin"))
                     .andExpect(jsonPath("$[0].roomNumber").value(12));
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
     }
 
@@ -365,9 +368,9 @@ class ReservationIntegrationTest {
                     .andExpect(jsonPath("$.username").value("martin"))
                     .andExpect(jsonPath("$.roomNumber").value(12));
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
 
         @Test
@@ -379,9 +382,9 @@ class ReservationIntegrationTest {
                     .andExpect(jsonPath("$.message").exists())
                     .andExpect(jsonPath("$.status").value(404));
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
     }
 
@@ -403,9 +406,9 @@ class ReservationIntegrationTest {
 
             assertFalse(exists, "The reservation should be deleted");
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
 
         @Test
@@ -417,9 +420,9 @@ class ReservationIntegrationTest {
                     .andExpect(jsonPath("$.message").exists())
                     .andExpect(jsonPath("$.status").value(404));
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
     }
 
@@ -452,9 +455,9 @@ class ReservationIntegrationTest {
             assertEquals("martin", updatedReservation.getUsername());
             assertEquals(12, updatedReservation.getRoomNumber());
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
 
         @Test
@@ -467,9 +470,9 @@ class ReservationIntegrationTest {
                     .andExpect(jsonPath("$.message").exists())
                     .andExpect(jsonPath("$.status").value(404));
 
-            verifyNoInteractions(userFeignClient);
-            verifyNoInteractions(hotelFeignClient);
-            verifyNoInteractions(roomFeignClient);
+            verifyNoInteractions(userIntegrationService);
+            verifyNoInteractions(hotelIntegrationService);
+            verifyNoInteractions(roomIntegrationService);
         }
     }
 }
