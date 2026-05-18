@@ -1,27 +1,26 @@
 package com.hotels.microservices.msvc_users.service;
 
-import com.hotels.microservices.msvc_users.dto.AuthRequestDTO;
+
 import com.hotels.microservices.msvc_users.dto.UserRequestDTO;
 import com.hotels.microservices.msvc_users.dto.UserResponseDTO;
 import com.hotels.microservices.msvc_users.dto.UserUpdateDTO;
+import com.hotels.microservices.msvc_users.exception.UserNotFoundException;
 import com.hotels.microservices.msvc_users.mapper.IUserMapper;
 import com.hotels.microservices.msvc_users.model.User;
 import com.hotels.microservices.msvc_users.repository.IRepositoryUser;
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-public class ServiceUser implements IServiceUser{
+@RequiredArgsConstructor
+public class UserService implements IUserService {
 
-    @Autowired
-    IRepositoryUser repositoryUser;
+    private final IRepositoryUser repositoryUser;
 
-    @Autowired
-    IUserMapper userMapper;
+    private final IUserMapper userMapper;
 
     @Override
     public List<UserResponseDTO> findAll() {
@@ -31,7 +30,7 @@ public class ServiceUser implements IServiceUser{
     @Override
     public UserResponseDTO findById(Long id) {
         return repositoryUser.findById(id).map(userMapper::toUserResponseDTO).orElseThrow(
-                () -> new EntityNotFoundException("User not found"));
+                () -> new UserNotFoundException("User with id " + id +" not found"));
     }
 
 
@@ -44,10 +43,9 @@ public class ServiceUser implements IServiceUser{
     }
 
     @Override
-    @Transactional
     public void delete(Long id) {
         if(!repositoryUser.existsById(id)) {
-            throw new EntityNotFoundException("User not found");
+            throw new UserNotFoundException("User with id " + id +" not found");
         }
         repositoryUser.deleteById(id);
     }
@@ -55,7 +53,7 @@ public class ServiceUser implements IServiceUser{
     @Override
     @Transactional
     public UserResponseDTO edit(UserUpdateDTO userUpdateDTO, Long id) {
-        User editUser = repositoryUser.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User editUser = repositoryUser.findById(id).orElseThrow(() -> new UserNotFoundException("User with id " + id +" not found"));
         userMapper.updateUserFromDTO(userUpdateDTO,editUser);
 
         User editedUser = repositoryUser.save(editUser);
@@ -63,6 +61,4 @@ public class ServiceUser implements IServiceUser{
         return userMapper.toUserResponseDTO(editedUser);
 
     }
-
-
 }

@@ -4,71 +4,55 @@ import com.microservicios.msvc_reviews.client.UserClientRest;
 import com.microservicios.msvc_reviews.dto.ReviewRequestDTO;
 import com.microservicios.msvc_reviews.dto.ReviewResponseDTO;
 import com.microservicios.msvc_reviews.dto.UserResponseDTO;
+import com.microservicios.msvc_reviews.exception.ExternalServiceException;
+import com.microservicios.msvc_reviews.exception.ReviewNotFoundException;
+import com.microservicios.msvc_reviews.exception.UserNotFoundException;
 import com.microservicios.msvc_reviews.mapper.IReviewMapper;
 import com.microservicios.msvc_reviews.model.Review;
 import com.microservicios.msvc_reviews.repository.IRepositoryReview;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.module.ResolutionException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ServiceReview implements IServiceReview {
 
-    @Autowired
-    IRepositoryReview repositoryReview;
-
-    @Autowired
-    IReviewMapper reviewMapper;
-
-    @Autowired
-    UserClientRest userClientRest;
+    private final IRepositoryReview repositoryReview;
+    private final IReviewMapper reviewMapper;
+    private final UserClientRest userClientRest;
 
     @Override
     public List<ReviewResponseDTO> getByHotel(Long hotelId) {
-        List<Review> reviews = repositoryReview.findByHotelId(hotelId);
-
-        return reviews.stream()
-                .map(r -> {
-                    ReviewResponseDTO dto = reviewMapper.toDTO(r);
-                    enrichWithUsername(dto, r.getUserId());
-                    return dto;
-                })
+        return repositoryReview.findByHotelId(hotelId).stream()
+                .map(this::mapAndEnrich)
                 .toList();
     }
 
-
     @Override
     public List<ReviewResponseDTO> getAll() {
-        List<Review> reviews = repositoryReview.findAll();
-
-        return reviews.stream()
-                .map(r -> {
-                    ReviewResponseDTO dto = reviewMapper.toDTO(r);
-                    enrichWithUsername(dto, r.getUserId());
-                    return dto;
-                })
+        return repositoryReview.findAll().stream()
+                .map(this::mapAndEnrich)
                 .toList();
     }
 
     @Override
     public ReviewResponseDTO getReviewById(Long reviewId) {
         Review review = repositoryReview.findById(reviewId)
-                .orElseThrow(() -> new EntityNotFoundException("Review not exist"));
-
-        ReviewResponseDTO dto = reviewMapper.toDTO(review);
-        enrichWithUsername(dto,review.getUserId());
-        return dto;
+                .orElseThrow(() -> new ReviewNotFoundException("Review with id " + reviewId + " not found"));
+        return mapAndEnrich(review);
     }
 
     @Override
     public ReviewResponseDTO create(ReviewRequestDTO reviewRequestDTO) {
         Review review = repositoryReview.save(reviewMapper.toReview(reviewRequestDTO));
-        ReviewResponseDTO dto = reviewMapper.toDTO(review);
-        enrichWithUsername(dto,review.getUserId());
-        return dto;
+        return mapAndEnrich(review);
     }
 
     @Override
@@ -76,13 +60,22 @@ public class ServiceReview implements IServiceReview {
         repositoryReview.deleteById(reviewId);
     }
 
+    private ReviewResponseDTO mapAndEnrich(Review review) {
+        ReviewResponseDTO dto = reviewMapper.toDTO(review);
+        enrichWithUsername(dto, review.getUserId());
+        return dto;
+    }
+
     private void enrichWithUsername(ReviewResponseDTO dto, Long userId) {
         try {
-            UserResponseDTO user = userClientRest.getUser(userId).getBody();
-            dto.setUsername(user.getUsername());
-        } catch (Exception e) {
-            dto.setUsername("Usuario desconocido");
-        }
+            UserResponseDTO user = Optional.ofNullable(userClientRest.getUser(userId).getBody())
+                    .orElseThrow(() -> new UserNotFoundException("User data is empty for ID " + userId));
 
+            dto.setUsername(user.getUsername());
+        } catch (FeignException.NotFound e) {
+            throw new UserNotFoundException("The user with ID " + userId + " does not exist.");
+        } catch (FeignException e) {
+            throw new ExternalServiceException("The User service is currently unavailable.");
+        }
     }
 }

@@ -5,7 +5,8 @@ import com.hotels.microservices.msvc_rooms.dto.RoomUpdateDTO;
 import com.hotels.microservices.msvc_rooms.exception.RoomNotFoundException;
 import com.hotels.microservices.msvc_rooms.mapper.IRoomMapper;
 import com.hotels.microservices.msvc_rooms.model.Room;
-import com.hotels.microservices.msvc_rooms.repository.IRepositoryRoom;
+import com.hotels.microservices.msvc_rooms.repository.IRoomRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,27 +14,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ServiceRoom implements IServiceRoom{
 
-    @Autowired
-    IRepositoryRoom repositoryRoom;
 
-    @Autowired
-    IRoomMapper roomMapper;
+    private final IRoomRepository repositoryRoom;
+
+    private final IRoomMapper roomMapper;
 
     @Override
     public List<RoomDTO> findAll() {
-
         List<Room> rooms = repositoryRoom.findAll();
-
         return rooms.stream().map(r -> roomMapper.toDTO(r)).toList();
-
     }
 
     @Override
     public RoomDTO findById(Long id) {
         return repositoryRoom.findById(id).map(roomMapper::toDTO).orElseThrow(()->
-                new RoomNotFoundException("Room with id " + id + "not found", "ROOM_NOT_FOUND"));
+                new RoomNotFoundException("Room with id " + id + "not found"));
     }
 
     @Override
@@ -63,7 +61,7 @@ public class ServiceRoom implements IServiceRoom{
     @Transactional
     public void deleteRoom(Long id) {
         if(!repositoryRoom.existsById(id)) {
-            throw new RoomNotFoundException("Room not found with id " + id, "ROOM_NOT_FOUND");
+            throw new RoomNotFoundException("Room with id " + id + " not found");
         }
         repositoryRoom.deleteById(id);
     }
@@ -78,7 +76,7 @@ public class ServiceRoom implements IServiceRoom{
     @Transactional
     public RoomDTO editRoom(RoomUpdateDTO roomUpdateDTO, Long id) {
         Room room = repositoryRoom.findById(id).orElseThrow(() ->
-                new RoomNotFoundException("Room with id " + id + "not found", "ROOM_NOT_FOUND"));
+                new RoomNotFoundException("Room with id " + id + "not found"));
 
         roomMapper.updateRoomFromDto(roomUpdateDTO,room);
 

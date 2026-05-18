@@ -6,6 +6,7 @@ import com.hotels.microservices.msvc_rooms.dto.RoomUpdateDTO;
 import com.hotels.microservices.msvc_rooms.model.Room;
 import com.hotels.microservices.msvc_rooms.service.IServiceRoom;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,13 +19,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/rooms")
+@RequiredArgsConstructor
 public class RoomController {
 
-    @Autowired
-    IServiceRoom serviceRoom;
+    private final IServiceRoom serviceRoom;
 
-    @Autowired
-    RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
     @GetMapping
     public ResponseEntity<List<RoomDTO>> getAllRooms(){

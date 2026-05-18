@@ -1,11 +1,10 @@
 package com.hotels.microservices.msvc_users.config;
 
 import com.hotels.microservices.msvc_users.config.filter.JwtTokenValidator;
-import com.hotels.microservices.msvc_users.service.ServiceUserDetailsImpl;
+import com.hotels.microservices.msvc_users.service.UserDetailsServiceImpl;
 import com.hotels.microservices.msvc_users.utils.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -53,7 +52,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(ServiceUserDetailsImpl userDetailService) {
+    public AuthenticationProvider authenticationProvider(UserDetailsServiceImpl userDetailService) {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setUserDetailsService(userDetailService);
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());

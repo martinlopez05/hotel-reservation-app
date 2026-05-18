@@ -2,9 +2,11 @@ package com.hotels.microservices.msvc_users.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class AuthRequestDTO {
 
     @NotBlank
