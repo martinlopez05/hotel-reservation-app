@@ -8,6 +8,7 @@ import com.hotels.microservices.msvc_hotels.exception.HotelNotFoundException;
 import com.hotels.microservices.msvc_hotels.mapper.IHotelMapper;
 import com.hotels.microservices.msvc_hotels.model.Hotel;
 import com.hotels.microservices.msvc_hotels.repository.IRepositoryHotel;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,16 +18,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ServiceHotel implements IServiceHotel{
 
-    @Autowired
-    IRepositoryHotel repositoryHotel;
 
-    @Autowired
-    IHotelMapper hotelMapper;
+    private final IRepositoryHotel repositoryHotel;
 
-    @Autowired
-    RoomClientRest roomClientRest;
+    private final IHotelMapper hotelMapper;
+
+    private final RoomClientRest roomClientRest;
 
     @Override
     @Transactional
