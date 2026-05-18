@@ -1,4 +1,4 @@
-name: CI - Microservice Reservations
+name: CI - Microservices Tests
 
 on:
   push:
@@ -13,8 +13,17 @@ on:
 
 jobs:
   build-and-test:
-
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        microservice:
+          - msvc-hotels
+          - msvc-payments
+          - msvc-reservations
+          - msvc-reviews
+          - msvc-rooms
+          - msvc-users
+      fail-fast: false
 
     steps:
       - name: Descargar el código del repositorio
@@ -27,6 +36,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Compilar y Correr los Tests de msvc-reservations
+      - name: Compilar y Correr los Tests de ${{ matrix.microservice }}
         run: mvn clean verify
-        working-directory: ./Backend/hotel-reservation-system/msvc-reservations
+        working-directory: ./Backend/hotel-reservation-system/${{ matrix.microservice }}
