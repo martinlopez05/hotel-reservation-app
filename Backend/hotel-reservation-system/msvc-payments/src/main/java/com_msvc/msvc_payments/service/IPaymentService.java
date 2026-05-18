@@ -2,11 +2,10 @@ package com_msvc.msvc_payments.service;
 
 import com_msvc.msvc_payments.dto.PaymentRequestDTO;
 import com_msvc.msvc_payments.dto.PaymentResponseDTO;
-import com_msvc.msvc_payments.model.Payment;
 
 import java.util.List;
 
-public interface IServicePayment {
+public interface IPaymentService {
 
     List<PaymentResponseDTO> findAll();
     PaymentResponseDTO findByReservation(String reservationId);

@@ -1,7 +1,6 @@
-package com.hotels.microservices.msvc_reservations.exception;
+package com_msvc.msvc_payments.exception;
 
-
-import com.hotels.microservices.msvc_reservations.dto.ErrorResponseDTO;
+import com_msvc.msvc_payments.dto.ErrorResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,17 +9,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.stream.Collectors;
 
-
 @RestControllerAdvice
-public class GlobalHandlerException {
+public class GlobalExceptionHandler {
 
     //manejo de todos los errores 404
-    @ExceptionHandler({
-            ReservationNotFoundException.class,
-            RoomNotFoundException.class,
-            HotelNotFoundException.class,
-            UserNotFoundException.class
-    })
+    @ExceptionHandler({ PaymentNotFoundException.class})
     public ResponseEntity<ErrorResponseDTO> handleNotFoundExceptions(RuntimeException e){
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
                 .message(e.getMessage())
@@ -29,18 +22,6 @@ public class GlobalHandlerException {
                 .build();
 
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
-    }
-
-
-    @ExceptionHandler(RoomIsReservedException.class)
-    public ResponseEntity<ErrorResponseDTO> handleRoomIsReservedException(RoomIsReservedException e){
-        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
-                .message(e.getMessage())
-                .status(HttpStatus.CONFLICT.value())
-                .timestamp(System.currentTimeMillis())
-                .build();
-
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.CONFLICT);
     }
 
 

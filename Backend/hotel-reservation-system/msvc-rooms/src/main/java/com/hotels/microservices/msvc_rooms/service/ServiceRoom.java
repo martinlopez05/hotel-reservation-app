@@ -6,6 +6,7 @@ import com.hotels.microservices.msvc_rooms.exception.RoomNotFoundException;
 import com.hotels.microservices.msvc_rooms.mapper.IRoomMapper;
 import com.hotels.microservices.msvc_rooms.model.Room;
 import com.hotels.microservices.msvc_rooms.repository.IRoomRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,13 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ServiceRoom implements IServiceRoom{
 
-    @Autowired
-    IRoomRepository repositoryRoom;
 
-    @Autowired
-    IRoomMapper roomMapper;
+    private final IRoomRepository repositoryRoom;
+
+    private final IRoomMapper roomMapper;
 
     @Override
     public List<RoomDTO> findAll() {

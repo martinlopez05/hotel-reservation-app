@@ -7,10 +7,9 @@ import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.resources.preference.Preference;
 import com_msvc.msvc_payments.dto.PaymentRequestDTO;
 import com_msvc.msvc_payments.dto.PaymentResponseDTO;
-import com_msvc.msvc_payments.dto.ReservationResponseDTO;
-import com_msvc.msvc_payments.model.Payment;
-import com_msvc.msvc_payments.service.IServicePayment;
-import org.springframework.beans.factory.annotation.Autowired;
+import com_msvc.msvc_payments.exception.ExternalServiceException;
+import com_msvc.msvc_payments.service.IPaymentService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,15 +24,23 @@ import java.util.Map;
 @RequestMapping("/payment")
 public class PaymentController {
 
-    @Autowired
-    private PreferenceClient preferenceClient;
+    private final PreferenceClient preferenceClient;
 
     @Value("${mercadopago.access-token}")
     private String accessToken;
 
-    @Autowired
-    IServicePayment servicePayment;
+    @Value("${hotelfly.api.webhook-url}")
+    private String webhookUrl;
 
+    @Value("${hotelfly.frontend.url}")
+    private String frontendUrl;
+
+    private final IPaymentService servicePayment;
+
+    public PaymentController(PreferenceClient preferenceClient, IPaymentService servicePayment) {
+        this.preferenceClient = preferenceClient;
+        this.servicePayment = servicePayment;
+    }
 
     @GetMapping
     public ResponseEntity<List<PaymentResponseDTO>> getPayments() {
@@ -66,18 +73,16 @@ public class PaymentController {
             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                     .items(List.of(item))
                     .externalReference(request.getUserId() + ":" + request.getReservationId())
-                    .notificationUrl("https://vps-5440117-x.dattaweb.com/payment/webhook")
+                    .notificationUrl(webhookUrl)
                     .backUrls(
                             PreferenceBackUrlsRequest.builder()
-                                    .success("https://hotelfly.netlify.app")
-                                    .failure("https://hotelfly.netlify.app")
-                                    .pending("https://hotelfly.netlify.app/")
+                                    .success(frontendUrl)
+                                    .failure(frontendUrl)
+                                    .pending(frontendUrl)
                                     .build()
                     )
                     .autoReturn("approved")
                     .build();
-
-
 
             Preference preference = preferenceClient.create(preferenceRequest);
 
@@ -86,24 +91,18 @@ public class PaymentController {
             return ResponseEntity.ok(response);
 
         } catch (MPApiException e) {
-            System.out.println("=== Mercado Pago API Error ===");
-            System.out.println("Status code: " + e.getStatusCode());
-            System.out.println("Response: " + e.getApiResponse().getContent());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", e.getApiResponse().getContent()));
+            throw new ExternalServiceException("Mercado Pago API Error: " + e.getApiResponse().getContent());
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", e.getMessage()));
+            throw new ExternalServiceException("Error creating Mercado Pago preference: " + e.getMessage());
         }
     }
 
     @PostMapping("/webhook")
     public ResponseEntity<String> webhook(@RequestBody Map<String, Object> body) {
         Map<String, Object> data = (Map<String, Object>) body.get("data");
+
         if (data == null || !data.containsKey("id")) {
-            return ResponseEntity.badRequest().body("Sin ID de pago");
+            throw new IllegalArgumentException("Invalid webhook payload: Missing payment data ID");
         }
 
         Long paymentId = Long.valueOf(data.get("id").toString());
@@ -121,13 +120,11 @@ public class PaymentController {
                     String reservationId = parts[1];
                     servicePayment.editReservation(reservationId, "PAYMENT");
                 } else {
-                    System.err.println("External reference inválido: " + mpPayment.getExternalReference());
+                    throw new IllegalArgumentException("Invalid external reference format in Mercado Pago payment: " + mpPayment.getExternalReference());
                 }
             }
-
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Error procesando pago");
+            throw new ExternalServiceException("Error processing Mercado Pago webhook for payment ID " + paymentId + ". Details: " + e.getMessage());
         }
 
         return ResponseEntity.ok("OK");

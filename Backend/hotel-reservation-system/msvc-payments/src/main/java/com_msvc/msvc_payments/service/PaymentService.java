@@ -4,10 +4,11 @@ import com_msvc.msvc_payments.client.ReservationClient;
 import com_msvc.msvc_payments.dto.PaymentRequestDTO;
 import com_msvc.msvc_payments.dto.PaymentResponseDTO;
 import com_msvc.msvc_payments.dto.ReservationResponseDTO;
+import com_msvc.msvc_payments.exception.ExternalServiceException;
+import com_msvc.msvc_payments.exception.PaymentNotFoundException;
 import com_msvc.msvc_payments.model.Payment;
 import com_msvc.msvc_payments.repository.IRepositoryPayment;
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,21 +16,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ServicePayment implements IServicePayment {
+@RequiredArgsConstructor
+public class PaymentService implements IPaymentService {
 
-    @Autowired
-    IRepositoryPayment repositoryPayment;
+    private final IRepositoryPayment repositoryPayment;
 
-    @Autowired
-    ReservationClient reservationClient;
+    private final ReservationClient reservationClient;
 
     public void savePaymentFromMP(com.mercadopago.resources.payment.Payment mpPayment) {
 
         String[] parts = mpPayment.getExternalReference().split(":");
         Long userId = Long.valueOf(parts[0]);
         String reservationId = parts[1];
-
-
 
         Payment entity = Payment.builder()
                 .mpPaymentId(mpPayment.getId())
@@ -56,7 +54,7 @@ public class ServicePayment implements IServicePayment {
 
         Payment saved = repositoryPayment.save(entity);
 
-        PaymentResponseDTO response = PaymentResponseDTO.builder()
+        return PaymentResponseDTO.builder()
                 .id(saved.getId())
                 .mpPaymentId(saved.getMpPaymentId())
                 .userId(saved.getUserId())
@@ -66,8 +64,6 @@ public class ServicePayment implements IServicePayment {
                 .paymentMethod(saved.getPaymentMethod())
                 .registrationDate(saved.getRegistrationDate())
                 .build();
-
-        return response;
     }
 
 
@@ -77,8 +73,16 @@ public class ServicePayment implements IServicePayment {
         List<PaymentResponseDTO> paymentsResponse = new ArrayList<>();
 
 
+
         for(Payment payment : payments){
-            ReservationResponseDTO reservationResponseDTO = reservationClient.getReservation(payment.getReservationId()).getBody();
+            ReservationResponseDTO reservationResponseDTO;
+
+            try {
+                reservationResponseDTO = reservationClient.getReservation(payment.getReservationId()).getBody();
+            } catch (Exception e) {
+                throw new ExternalServiceException("Reservation service is currently unavailable.");
+            }
+
             PaymentResponseDTO response = PaymentResponseDTO.builder()
                     .id(payment.getId())
                     .mpPaymentId(payment.getMpPaymentId())
@@ -107,7 +111,7 @@ public class ServicePayment implements IServicePayment {
 
 
     public PaymentResponseDTO findByReservation(String reservationId) {
-        Payment payment = repositoryPayment.findByReservationId(reservationId).orElseThrow(()-> new EntityNotFoundException("Payment not exist"));
+        Payment payment = repositoryPayment.findByReservationId(reservationId).orElseThrow(()-> new PaymentNotFoundException("Payment not found"));
 
         PaymentResponseDTO response = PaymentResponseDTO.builder()
                 .id(payment.getId())
