@@ -4,12 +4,10 @@ import com.hotels.microservices.msvc_users.config.RabbitConfig;
 import com.hotels.microservices.msvc_users.dto.UserRequestDTO;
 import com.hotels.microservices.msvc_users.dto.UserResponseDTO;
 import com.hotels.microservices.msvc_users.dto.UserUpdateDTO;
-import com.hotels.microservices.msvc_users.service.IServiceUser;
-import feign.Response;
+import com.hotels.microservices.msvc_users.service.IUserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
 
-    @Autowired
-    RabbitTemplate rabbitTemplate;
 
-    @Autowired
-    IServiceUser serviceUser;
+    private final RabbitTemplate rabbitTemplate;
+
+    private final IUserService serviceUser;
 
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>>  getAllUsers(){
@@ -53,7 +51,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> editUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO userUpdateDTO){
         UserResponseDTO userResponseDTO = serviceUser.edit(userUpdateDTO,id);
         return ResponseEntity.ok(userResponseDTO);

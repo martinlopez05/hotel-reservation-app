@@ -1,15 +1,17 @@
 package com.hotels.microservices.msvc_users.service;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.hotels.microservices.msvc_users.dto.*;
 import com.hotels.microservices.msvc_users.enums.EnumRoles;
+import com.hotels.microservices.msvc_users.exception.BadCredentialsException;
+import com.hotels.microservices.msvc_users.exception.EmailAlreadyExistsException;
+import com.hotels.microservices.msvc_users.exception.RoleNotFoundException;
+import com.hotels.microservices.msvc_users.exception.UserNotFoundException;
 import com.hotels.microservices.msvc_users.model.RoleEntity;
 import com.hotels.microservices.msvc_users.model.User;
 import com.hotels.microservices.msvc_users.repository.IRepositoryRoleEntity;
 import com.hotels.microservices.msvc_users.repository.IRepositoryUser;
 import com.hotels.microservices.msvc_users.utils.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,31 +19,25 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
-    @Autowired
-    IRepositoryUser repositoryUser;
+    private final IRepositoryUser repositoryUser;
 
-    @Autowired
-    ServiceUserDetailsImpl userDetailService;
+    private final UserDetailsServiceImpl userDetailService;
 
-    @Autowired
-    IRepositoryRoleEntity roleRepository;
+    private final IRepositoryRoleEntity roleRepository;
 
     private final JwtUtil jwtUtil;
 
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
-        this.jwtUtil = jwtUtil;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public AuthResponseDTO login(AuthRequestDTO authRequestDTO) {
         UserDetails userDetails = userDetailService.loadUserByUsername(authRequestDTO.getUsername());
 
         if (!passwordEncoder.matches(authRequestDTO.getPassword(), userDetails.getPassword())) {
-            throw new RuntimeException("Incorrect password");
+            throw new BadCredentialsException("Incorrect password");
         }
 
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
@@ -49,7 +45,7 @@ public class AuthService {
         String token = jwtUtil.generateToken(userDetails.getUsername(), role);
 
         User user = repositoryUser.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with username" + userDetails.getUsername()  + " not found"));
 
         return AuthResponseDTO.builder()
                 .id(user.getId())
@@ -69,14 +65,14 @@ public class AuthService {
                 : "USER";
 
         if (repositoryUser.findByEmail(registerRequestDTO.getEmail()).isPresent()) {
-            throw new RuntimeException("The email is already registered");
+            throw new EmailAlreadyExistsException("The email is already registered");
         }
 
 
         Optional<RoleEntity> roleOpt = roleRepository.findByName(EnumRoles.valueOf(role));
 
         if (roleOpt.isEmpty()) {
-            throw new RuntimeException("Error: Role " + role + " not found in the database.");
+            throw new RoleNotFoundException("Error: Role " + role + " not found in the database.");
         }
 
         User user = User.builder()

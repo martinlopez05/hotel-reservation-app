@@ -3,16 +3,18 @@ package com.hotels.microservices.msvc_users.service;
 import com.hotels.microservices.msvc_users.model.User;
 import com.hotels.microservices.msvc_users.model.UserDetailsImpl;
 import com.hotels.microservices.msvc_users.repository.IRepositoryUser;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ServiceUserDetailsImpl implements UserDetailsService {
-    @Autowired
-    IRepositoryUser repositoryUser;
+@RequiredArgsConstructor
+public class UserDetailsServiceImpl implements UserDetailsService {
+
+
+    private final IRepositoryUser repositoryUser;
 
 
     @Override
