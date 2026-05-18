@@ -1,7 +1,6 @@
-package com.hotels.microservices.msvc_hotels.exception;
+package com.hotels.microservices.msvc_rooms.exception;
 
-import com.hotels.microservices.msvc_hotels.dtos.ErrorResponseDTO;
-import jakarta.persistence.EntityNotFoundException;
+import com.hotels.microservices.msvc_rooms.dto.ErrorResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,26 +12,15 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({EntityNotFoundException.class, HotelNotFoundException.class})
-    public ResponseEntity<ErrorResponseDTO> handleNotFoundException(Exception ex) {
-        ErrorResponseDTO error = ErrorResponseDTO.builder()
+    @ExceptionHandler({RoomNotFoundException.class})
+    public ResponseEntity<ErrorResponseDTO> handleNotFoundExceptions(RuntimeException e){
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
+                .message(e.getMessage())
                 .status(HttpStatus.NOT_FOUND.value())
-                .message(ex.getMessage())
                 .timestamp(System.currentTimeMillis())
                 .build();
 
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(ExternalServiceException.class)
-    public ResponseEntity<ErrorResponseDTO> handleExternalServiceException(ExternalServiceException ex) {
-        ErrorResponseDTO error = ErrorResponseDTO.builder()
-                .status(HttpStatus.SERVICE_UNAVAILABLE.value())
-                .message(ex.getMessage())
-                .timestamp(System.currentTimeMillis())
-                .build();
-
-        return new ResponseEntity<>(error, HttpStatus.SERVICE_UNAVAILABLE);
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -51,4 +39,5 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
+
 }

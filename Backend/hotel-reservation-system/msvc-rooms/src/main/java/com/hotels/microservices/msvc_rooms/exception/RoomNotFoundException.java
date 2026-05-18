@@ -6,14 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class RoomNotFoundException extends RuntimeException {
-    private String code;
 
-    public RoomNotFoundException(String message, String code) {
+public class RoomNotFoundException extends RuntimeException {
+    public RoomNotFoundException(String message) {
         super(message);
-        this.code = code;
     }
 }
