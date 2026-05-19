@@ -9,6 +9,9 @@ import com_msvc.msvc_payments.dto.PaymentRequestDTO;
 import com_msvc.msvc_payments.dto.PaymentResponseDTO;
 import com_msvc.msvc_payments.exception.ExternalServiceException;
 import com_msvc.msvc_payments.service.IPaymentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/payment")
+@RequiredArgsConstructor
+@Tag(name = "Payment Controller", description = "Endpoints para la gestión de pagos, integración nativa con Mercado Pago y procesamiento de Webhooks")
 public class PaymentController {
 
     private final PreferenceClient preferenceClient;
@@ -37,22 +42,32 @@ public class PaymentController {
 
     private final IPaymentService servicePayment;
 
-    public PaymentController(PreferenceClient preferenceClient, IPaymentService servicePayment) {
-        this.preferenceClient = preferenceClient;
-        this.servicePayment = servicePayment;
-    }
 
     @GetMapping
+    @Operation(
+            summary = "Listar todos los registros de pagos",
+            description = "Retorna el historial completo de transacciones económicas registradas en el sistema."
+    )
     public ResponseEntity<List<PaymentResponseDTO>> getPayments() {
         return ResponseEntity.ok(servicePayment.findAll());
     }
 
     @GetMapping("/reservation/{reservationId}")
-    public ResponseEntity<PaymentResponseDTO> getByReservation(@PathVariable String reservationId) {
+    @Operation(
+            summary = "Buscar pago por ID de Reserva",
+            description = "Obtiene los detalles del pago asociado a una reserva específica."
+    )
+    public ResponseEntity<PaymentResponseDTO> getByReservation(
+            @Parameter(description = "ID alfanumérico de la reserva vinculada", example = "res-9b1deb4d-3b7d")
+            @PathVariable String reservationId) {
         return ResponseEntity.ok(servicePayment.findByReservation(reservationId));
     }
 
     @PostMapping
+    @Operation(
+            summary = "Registrar un pago manual",
+            description = "Permite dar de alta un pago de forma interna en el sistema (ej: efectivo o transferencia directa) y actualiza el estado de la reserva en cascada."
+    )
     public ResponseEntity<PaymentResponseDTO> createManualPayment(@RequestBody PaymentRequestDTO dto) {
         PaymentResponseDTO paymentResponseDTO = servicePayment.saveManualPayment(dto);
         servicePayment.editReservation(paymentResponseDTO.getReservationId(), "PAYMENT");
@@ -61,6 +76,10 @@ public class PaymentController {
 
 
     @PostMapping("/mercadopago")
+    @Operation(
+            summary = "Crear preferencia de Mercado Pago",
+            description = "Genera un checkout en la API de Mercado Pago con el monto de la reserva, las URL de retorno para el frontend y la URL de notificación (Webhook). Retorna la 'init_point' para redirigir al usuario."
+    )
     public ResponseEntity<Map<String, Object>> createPayment(@RequestBody PaymentRequestDTO request) {
         try {
             PreferenceItemRequest item = PreferenceItemRequest.builder()
@@ -98,6 +117,10 @@ public class PaymentController {
     }
 
     @PostMapping("/webhook")
+    @Operation(
+            summary = "Recibir notificaciones asincrónicas (Webhook)",
+            description = "Endpoint expuesto para que Mercado Pago envíe notificaciones en tiempo real sobre los cambios de estado de los pagos. Valida la transacción con la pasarela externa y actualiza la reserva si el estado es APPROVED."
+    )
     public ResponseEntity<String> webhook(@RequestBody Map<String, Object> body) {
         Map<String, Object> data = (Map<String, Object>) body.get("data");
 
@@ -129,6 +152,4 @@ public class PaymentController {
 
         return ResponseEntity.ok("OK");
     }
-
-
 }
