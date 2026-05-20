@@ -1,6 +1,22 @@
 server:
   port: ${GATEWAY_PORT:8090}
 
+springdoc:
+  swagger-ui:
+    urls:
+      - name: Usuarios
+        url: /users/v3/api-docs
+      - name: Hoteles
+        url: /hotels/v3/api-docs
+      - name: Habitaciones
+        url: /rooms/v3/api-docs
+      - name: Reservas
+        url: /reservations/v3/api-docs
+      - name: Pagos
+        url: /payment/v3/api-docs
+      - name: Reseñas
+        url: /review/v3/api-docs
+
 spring:
   application:
     name: msvc-api-gateway

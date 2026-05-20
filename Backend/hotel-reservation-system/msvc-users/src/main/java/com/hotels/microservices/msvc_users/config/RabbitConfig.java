@@ -17,7 +17,7 @@ public class RabbitConfig {
 
     @Bean
     Queue queue() {
-        return new Queue(QUEUE, false);
+        return new Queue(QUEUE, true);
     }
 
     @Bean

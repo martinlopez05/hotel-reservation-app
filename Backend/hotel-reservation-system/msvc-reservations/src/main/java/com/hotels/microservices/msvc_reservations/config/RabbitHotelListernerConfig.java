@@ -10,7 +10,7 @@ public class RabbitHotelListernerConfig {
             "hotel.exchange";
 
     public static final String QUEUE =
-            "reservation.hotel.deleted.queue";
+            "hotel.deleted.queue";
 
     public static final String ROUTING_KEY =
             "hotel.deleted.key";

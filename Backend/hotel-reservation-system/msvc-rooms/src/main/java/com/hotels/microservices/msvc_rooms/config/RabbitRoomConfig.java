@@ -17,7 +17,7 @@ public class RabbitRoomConfig {
 
     @Bean
     Queue queue() {
-        return new Queue(QUEUE, false); // false: no durable
+        return new Queue(QUEUE, true);
     }
 
     @Bean

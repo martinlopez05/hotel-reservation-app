@@ -1,9 +1,7 @@
 services:
 
   eureka-server:
-    build:
-      context: .
-      dockerfile: ./eureka-server/Dockerfile
+    image: martinlopez05/eureka-server
     container_name: eureka-server
     restart: always
     env_file: .env
@@ -14,9 +12,7 @@ services:
 
 
   api-gateway:
-    build:
-      context: .
-      dockerfile: ./msvc-api-gateway/Dockerfile
+    image: martinlopez05/msvc-api-gateway
     container_name: api-gateway
     env_file: .env
     ports:
@@ -32,9 +28,7 @@ services:
 
 
   msvc-hotels:
-    build:
-      context: .
-      dockerfile: ./msvc-hotels/Dockerfile
+    image: martinlopez05/msvc-hotels
     container_name: msvc-hotels
     env_file: .env
     depends_on:
@@ -71,9 +65,7 @@ services:
       - hotel-net
 
   msvc-rooms:
-    build:
-      context: .
-      dockerfile: ./msvc-rooms/Dockerfile
+    image: martinlopez05/msvc-rooms
     container_name: msvc-rooms
     env_file: .env
     depends_on:
@@ -112,9 +104,7 @@ services:
 
 
   msvc-reservations:
-    build:
-      context: .
-      dockerfile: ./msvc-reservations/Dockerfile
+    image: martinlopez05/msvc-reservations
     container_name: msvc-reservations
     env_file: .env
     depends_on:
@@ -146,9 +136,7 @@ services:
 
 
   msvc-users:
-    build:
-      context: .
-      dockerfile: ./msvc-users/Dockerfile
+    image: martinlopez05/msvc-users
     container_name: msvc-users
     env_file: .env
     depends_on:
@@ -188,9 +176,7 @@ services:
 
 
   msvc-payments:
-    build:
-      context: .
-      dockerfile: ./msvc-payments/Dockerfile
+    image: martinlopez05/msvc-payments
     container_name: msvc-payments
     env_file: .env
     depends_on:
@@ -225,9 +211,7 @@ services:
 
 
   msvc-reviews:
-    build:
-      context: .
-      dockerfile: ./msvc-reviews/Dockerfile
+    image: martinlopez05/msvc-reviews
     container_name: msvc-reviews
     env_file: .env
     depends_on:
