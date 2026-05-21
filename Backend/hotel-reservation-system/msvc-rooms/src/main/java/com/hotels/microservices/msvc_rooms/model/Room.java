@@ -42,7 +42,7 @@ public class Room {
     @Column(name = "price_per_night")
     private Double pricePerNight;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 1000)
     private String description;
 
 }
