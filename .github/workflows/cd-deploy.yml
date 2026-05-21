@@ -1,0 +1,116 @@
+name: CD - Build, Push & Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI - Microservices Tests"]
+    types:
+      - completed
+    branches:
+      - main
+      - master
+
+jobs:
+  # ─────────────────────────────────────────────
+  # JOB 1: Build y Push de imágenes a Docker Hub
+  # ─────────────────────────────────────────────
+  build-and-push:
+    name: Build & Push - ${{ matrix.microservice.name }}
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    strategy:
+      matrix:
+        microservice:
+          - name: eureka-server
+            image: martinlopez05/eureka-server
+          - name: msvc-api-gateway
+            image: martinlopez05/msvc-api-gateway
+          - name: msvc-hotels
+            image: martinlopez05/msvc-hotels
+          - name: msvc-payments
+            image: martinlopez05/msvc-payments
+          - name: msvc-reservations
+            image: martinlopez05/msvc-reservations
+          - name: msvc-reviews
+            image: martinlopez05/msvc-reviews
+          - name: msvc-rooms
+            image: martinlopez05/msvc-rooms
+          - name: msvc-users
+            image: martinlopez05/msvc-users
+      fail-fast: false
+
+    steps:
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Compilar el JAR de ${{ matrix.microservice.name }}
+        run: mvn clean package -DskipTests
+        working-directory: ./Backend/hotel-reservation-system/${{ matrix.microservice.name }}
+
+      - name: Login a Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build y Push de la imagen ${{ matrix.microservice.image }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend/hotel-reservation-system/${{ matrix.microservice.name }}
+          push: true
+          tags: |
+            ${{ matrix.microservice.image }}:latest
+            ${{ matrix.microservice.image }}:${{ github.sha }}
+
+  # ─────────────────────────────────────────────
+  # JOB 2: Deploy a la VPS via SSH
+  # ─────────────────────────────────────────────
+  deploy:
+    name: Deploy al Droplet de DigitalOcean
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Copiar docker-compose.yaml al Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          source: "Backend/hotel-reservation-system/docker-compose.yaml"
+          target: "~/hotelfly"
+          strip_components: 3
+
+      - name: Conectar por SSH y redesplegar los contenedores
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            cd ~/hotelfly
+
+            echo "Descargando las nuevas imágenes de Docker Hub..."
+            docker compose pull
+
+            echo "Reiniciando los microservicios actualizados..."
+            docker compose up -d --remove-orphans
+
+            echo "Limpiando imágenes viejas..."
+            docker image prune -f
+
+            echo "Deploy completado exitosamente!"
+            docker compose ps
