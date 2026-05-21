@@ -66,7 +66,8 @@ jobs:
       - name: Build y Push de la imagen ${{ matrix.microservice.image }}
         uses: docker/build-push-action@v5
         with:
-          context: ./Backend/hotel-reservation-system/${{ matrix.microservice.name }}
+          context: ./Backend/hotel-reservation-system
+          file: ./Backend/hotel-reservation-system/${{ matrix.microservice.name }}/Dockerfile
           push: true
           tags: |
             ${{ matrix.microservice.image }}:latest
