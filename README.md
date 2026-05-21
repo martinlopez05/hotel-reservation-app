@@ -3,9 +3,9 @@
 Aplicación web completa para la **gestión de reservas de hoteles**, desarrollada con **arquitectura de microservicios**.  
 El sistema permite administrar hoteles, habitaciones, usuarios, reservas y pagos, con roles (**admin / usuario**), autenticación **JWT** y comunicación entre servicios tanto **síncrona (REST/Feign)** como **asíncrona (RabbitMQ)**.
 
-La aplicación está desplegada y disponible en el siguiente enlace:  
+La aplicación está completamente desplegada en producción y disponible en el siguiente enlace:  
 
-👉 [https://hotelfly.netlify.app/](https://hotelfly.netlify.app/)  🌐
+👉 [**https://hotelfly.me**](https://hotelfly.me) 🌐
 
 ---
 
@@ -18,6 +18,17 @@ La aplicación está desplegada y disponible en el siguiente enlace:
 
 > Diagrama general del sistema, mostrando la comunicación entre los microservicios, el API Gateway, las bases de datos y RabbitMQ.
 
+
+---
+
+## 📄 Documentación de la API (Swagger)
+
+Toda la API del sistema se encuentra completamente documentada y expuesta de forma pública a través de **Swagger UI** de manera centralizada bajo conexiones seguras:
+
+* 🌐 **Interfaz Gráfica de Swagger:** [https://hotelflyapi.codes/swagger-ui/index.html](https://hotelflyapi.codes/swagger-ui/index.html)
+* 📊 **Especificación OpenAPI (JSON):** [https://hotelflyapi.codes/v3/api-docs](https://hotelflyapi.codes/v3/api-docs)
+
+*(A través del menú desplegable de Swagger se puede explorar e interactuar de forma interactiva con los endpoints de cada microservicio: Auth, Hotels, Rooms, Reservations, etc.)*
 
 ---
 
@@ -53,10 +64,12 @@ La aplicación está desplegada y disponible en el siguiente enlace:
 
 ---
 
-### 🐳 Contenedores y despliegue
-- 🐋 **Docker** → contenedores individuales por microservicio  
-- ⚙️ **Docker Compose** → orquestación del ecosistema completo (Gateway, Eureka, RabbitMQ, BDs, etc.)  
-- ☁️ **VPS Deployment (planeado)** → despliegue del sistema completo usando **Docker o Kubernetes**  
+### 🐳 Contenedores e Infraestructura (Cloud DevOps)
+- 🐋 **Docker** → Contenedorización individual por componente  
+- ⚙️ **Docker Compose** → Orquestación del ecosistema completo (Servicios, Gateways, Colas y BDs)  
+- ☁️ **DigitalOcean Droplet (VPS)** → Servidor de producción en la nube  
+- 🔀 **Nginx** → Proxy inverso para la gestión eficiente del tráfico y enmascaramiento  
+- 🔒 **Certbot (Let's Encrypt)** → Emisión y renovación automatizada de certificados SSL (HTTPS)
 
 ---
 
@@ -69,7 +82,7 @@ Todos los servicios se registran en **Eureka Server** y se comunican entre sí m
 
 ## 💎 Microservicio Estrella: msvc-reservations
 
-El microservicio de **Reservations** ha sido diseñado como el estándar de calidad y robustez del proyecto, implementando una arquitectura tolerante a fallos y una suite de pruebas profesional:
+El microservicio de **Reservations** fue diseñado como el estándar de calidad y robustez del proyecto, implementando una arquitectura tolerante a fallos y una suite de pruebas profesional:
 
 ### 🛡️ Tolerancia a Fallos y Alta Disponibilidad (Resilience4j)
 Para evitar fallos en cascada dentro del ecosistema distribuido, se aisló la comunicación con los clientes Feign mediante una capa de **Servicios de Integración** decorados con patrones de resiliencia:
@@ -84,6 +97,8 @@ Para evitar fallos en cascada dentro del ecosistema distribuido, se aisló la co
 
 ### 🤖 Integración Continua (CI)
 Se estructuró un flujo de trabajo con **GitHub Actions** que compila y ejecuta de manera automatizada los **50 tests del microservicio** en un entorno Linux aislado en cada Push o Pull Request, garantizando que la rama principal permanezca siempre *Production Ready*.
+
+---
 
 ## 📬 Comunicación entre Microservicios
 
@@ -141,7 +156,7 @@ public void handleRoomDeleted(Long roomId) {
 |----------------|-------------|---------------|
 | 🧭 **Eureka Server** | Registro y descubrimiento de servicios *(service registry)* | — |
 | 🌐 **API Gateway** | Punto de entrada al sistema, balanceo de carga y seguridad global | — |
-| 🏨 **Hotel Service** | CRUD de hoteles | MySQL |
+| 🏨 **Hotel Service** | ABM de hoteles | MySQL |
 | 🛏️ **Room Service** | Gestión de habitaciones y disponibilidad | PostgreSQL |
 | 📅 **Reservation Service** | Creación, consulta y cancelación de reservas; escucha eventos de Room | MongoDB |
 | 👤 **User / Auth Service** | Registro, login y manejo de roles *(admin / user)* | MySQL |
@@ -149,7 +164,7 @@ public void handleRoomDeleted(Long roomId) {
 | 📝 **Review Service** | Opiniones y calificaciones de usuarios | MongoDB |
 ---
 
-## 🔐 Seguridad
+## 🔐 Seguridad integrada
 
 El sistema utiliza **Spring Security + JWT (JSON Web Tokens)** para la autenticación y autorización.
 
@@ -183,8 +198,7 @@ El sistema utiliza **Spring Security + JWT (JSON Web Tokens)** para la autentica
 - 💻 Frontend base (React + Tailwind + Context API)  
 - 🐳 Dockerización final con Compose *(en progreso)*  
 - 📄 Documentación Swagger / Postman *(en desarrollo)*  
-- ☁️ Despliegue en VPS / Kubernetes *(planeado)*
--  🛠️ Refactorización en curso: Implementando cobertura de pruebas unitarias en la capa de servicios con **JUnit 5 y Mockito**.
+- ☁️ Despliegue Cloud (Producción): Frontend productivo en Netlify y Backend orquestado en DigitalOcean VPS con HTTPS nativo.
 
 ---
 
@@ -193,60 +207,16 @@ El sistema utiliza **Spring Security + JWT (JSON Web Tokens)** para la autentica
 ### 🔧 Prerequisitos
 - ☕ **Java 17+**  
 - 🛠️ **Maven 3.6+**  
-- 🐇 **RabbitMQ**  
-- 🗄️ **MySQL**, **PostgreSQL** y **MongoDB**  
+- 🐳 Docker & Docker Compose (Recomendado para ahorrar configuraciones manuales de bases de datos y colas)
 
 ---
 
-### 🚀 Pasos de Ejecución
-
-#### 1️⃣ Clonar el repositorio
-```bash
-git clone https://github.com/martinlopez05/hotel-reservation-system.git
-cd hotel-reservation-system
-```
-
-#### 2️⃣ Iniciar RabbitMQ y las bases de datos necesarias  
-*(MySQL, PostgreSQL, MongoDB)*
-
-#### 3️⃣ Levantar Eureka Server
-```bash
-mvn spring-boot:run -pl eureka-server
-```
-
-#### 4️⃣ Levantar los microservicios
-```bash
-mvn spring-boot:run -pl msvc-hotels
-mvn spring-boot:run -pl msvc-rooms
-mvn spring-boot:run -pl msvc-reservations
-mvn spring-boot:run -pl msvc-users
-mvn spring-boot:run -pl msvc-payments
-mvn spring-boot:run -pl msvc-reviews
-```
-
-#### 5️⃣ Acceder al dashboard de Eureka  
-👉 [http://localhost:8761](http://localhost:8761)
-
-#### 6️⃣ Acceder al sistema a través del Gateway  
-👉 [http://localhost:8090](http://localhost:8090)
-
----
-
-## 🐳 Dockerización y Despliegue
-
-Todo el **backend** fue **dockerizado** para garantizar un entorno reproducible.  
-Se utiliza **Docker Compose** para orquestar los servicios principales:
-
-- 🧩 **Microservicios (Spring Boot)**
-- 🐇 **RabbitMQ**
-- 🗄️ **Bases de datos** (MySQL, PostgreSQL, MongoDB)
-- 🌐 **Eureka Server y API Gateway**
+### 🚀 Ejecución rápida con Docker
+-Si contás con Docker instalado, podés levantar el ecosistema completo (Bases de datos, RabbitMQ, Infraestructura de Spring y Microservicios) con un solo comando en la raíz del proyecto:
 
 ```bash
 docker-compose up -d --build
 ```
-Esto levanta todo el ecosistema y gestiona las dependencias entre contenedores.
-
 ---
 
 ## 🌍 Despliegue del Frontend
