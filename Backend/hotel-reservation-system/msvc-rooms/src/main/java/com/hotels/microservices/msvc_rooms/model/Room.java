@@ -30,7 +30,7 @@ public class Room {
     @Column(name = "capacity")
     private int capacity;
 
-    @Column(name = "imageUrl")
+    @Column(name = "imageUrl", columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(name = "available")
@@ -42,7 +42,7 @@ public class Room {
     @Column(name = "price_per_night")
     private Double pricePerNight;
 
-    @Column(name = "description", length = 1000)
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
 }

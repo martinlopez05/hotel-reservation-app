@@ -11,8 +11,8 @@ interface HotelCardProps {
 
 const HotelCard = ({ hotel }: HotelCardProps) => {
     return (
-        <Card key={hotel.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-            <div className="relative h-56 w-full">
+        <Card key={hotel.id} className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
+            <div className="relative h-56 w-full shrink-0">
                 <img
                     src={hotel.imageUrl || "/placeholder.svg"}
                     alt={hotel.name}
@@ -26,7 +26,7 @@ const HotelCard = ({ hotel }: HotelCardProps) => {
                     {hotel.location}, {hotel.country}
                 </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow">
                 <p className="text-sm text-muted-foreground mb-4 text-pretty">{hotel.description}</p>
                 <div className="flex items-center gap-1 mb-2">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
