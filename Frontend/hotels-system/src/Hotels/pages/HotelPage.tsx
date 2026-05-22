@@ -120,12 +120,12 @@ export default function HotelPage() {
 
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {rooms?.map((room) => (
-                            <Card key={room.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                            <Card key={room.id} className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
                                 {/* Imagen como header visual */}
                                 <img
                                     src={room.imageUrl || "/placeholder.svg?height=200&width=400&query=hotel room"}
                                     alt={`Habitación ${room.roomNumber}`}
-                                    className="w-full h-56 object-cover object-center"
+                                    className="w-full h-56 object-cover object-center shrink-0"
                                 />
 
                                 <CardHeader className="pb-4">
@@ -143,7 +143,7 @@ export default function HotelPage() {
                                     </div>
                                 </CardHeader>
 
-                                <CardContent className="space-y-4">
+                                <CardContent className="space-y-4 flex-grow flex flex-col justify-between">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2 text-muted-foreground">
                                             <Users className="w-4 h-4" />
@@ -155,7 +155,7 @@ export default function HotelPage() {
                                         </div>
                                     </div>
 
-                                    <div className="pt-4 border-t border-border">
+                                    <div className="pt-4 border-t border-border mt-auto">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-1 text-muted-foreground">
                                                 <DollarSign className="w-4 h-4" />
